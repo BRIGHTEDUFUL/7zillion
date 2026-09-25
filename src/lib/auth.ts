@@ -24,7 +24,16 @@ export type ChangePasswordResult =
       reason: "invalid_credentials" | "rate_limited" | "weak_password" | "server_error";
     };
 
+export type ChangeUsernameResult =
+  | { success: true }
+  | {
+      success: false;
+      reason: "invalid_credentials" | "rate_limited" | "invalid_username" | "server_error";
+    };
+
 export const MIN_PASSWORD_LENGTH = 8;
+export const MIN_USERNAME_LENGTH = 3;
+export const MAX_USERNAME_LENGTH = 64;
 
 export type SessionValidation = { valid: true; username: string } | { valid: false };
 
@@ -251,6 +260,62 @@ export async function changePassword(
     });
   } catch (error) {
     console.error("Failed to persist new password:", error);
+    return { success: false, reason: "server_error" };
+  }
+
+  return { success: true };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// changeUsername
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Change the admin username from an authenticated session.
+ *
+ * The current password must be re-verified first (same bar as a password
+ * change), then the new username is persisted to the Convex
+ * `adminCredentials` singleton alongside the *existing* password hash — a
+ * username change never touches the password itself. Existing sessions keep
+ * working; the new name is used from the next sign-in.
+ */
+export async function changeUsername(
+  newUsername: string,
+  currentPassword: string,
+  ip: string,
+  env: Env,
+): Promise<ChangeUsernameResult> {
+  const allowed = await checkRateLimit(ip, env);
+  if (!allowed) {
+    return { success: false, reason: "rate_limited" };
+  }
+
+  const creds = await effectiveCredentials(env);
+
+  let currentMatches = false;
+  if (typeof currentPassword === "string" && creds.passwordHash.length > 0) {
+    try {
+      currentMatches = await compare(currentPassword, creds.passwordHash);
+    } catch {
+      currentMatches = false;
+    }
+  }
+  if (!currentMatches) {
+    return { success: false, reason: "invalid_credentials" };
+  }
+
+  const username = typeof newUsername === "string" ? newUsername.trim() : "";
+  if (username.length < MIN_USERNAME_LENGTH || username.length > MAX_USERNAME_LENGTH) {
+    return { success: false, reason: "invalid_username" };
+  }
+
+  try {
+    await convexInternalMutation("auth:setAdminCredentials", {
+      username,
+      passwordHash: creds.passwordHash,
+    });
+  } catch (error) {
+    console.error("Failed to persist new username:", error);
     return { success: false, reason: "server_error" };
   }
 

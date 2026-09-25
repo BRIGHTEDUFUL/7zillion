@@ -153,3 +153,51 @@ export const changePasswordFn = createServerFn({ method: "POST" })
 
     return { success: true as const };
   });
+
+const changeUsernameSchema = z.object({
+  username: z.string().trim().min(1, "Enter a username."),
+  currentPassword: z.string().min(1, "Enter your current password."),
+});
+
+/**
+ * Change the admin username from the Settings page. Same bar as a password
+ * change: a valid session plus re-verification of the current password. The
+ * password hash is carried over untouched.
+ */
+export const changeUsernameFn = createServerFn({ method: "POST" })
+  .validator(changeUsernameSchema)
+  .handler(async ({ data, context }) => {
+    const sessionToken = getCookie(ADMIN_SESSION_COOKIE);
+    if (!sessionToken) throw redirect({ to: LOGOUT_REDIRECT });
+
+    const session = await auth.validateSession(sessionToken, getApiEnv(context));
+    if (!session.valid) throw redirect({ to: LOGOUT_REDIRECT });
+
+    const result = await auth.changeUsername(
+      data.username,
+      data.currentPassword,
+      getClientIp(),
+      getApiEnv(context),
+    );
+
+    if (!result.success) {
+      switch (result.reason) {
+        case "rate_limited":
+          return {
+            success: false as const,
+            error: "Too many attempts. Please wait 15 minutes and try again.",
+          };
+        case "invalid_username":
+          return {
+            success: false as const,
+            error: `Use a username of ${auth.MIN_USERNAME_LENGTH}–${auth.MAX_USERNAME_LENGTH} characters.`,
+          };
+        case "server_error":
+          return { success: false as const, error: "Could not save the username. Try again." };
+        case "invalid_credentials":
+          return { success: false as const, error: "Current password is incorrect." };
+      }
+    }
+
+    return { success: true as const };
+  });

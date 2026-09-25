@@ -21,6 +21,7 @@ import {
   validateSession,
   login,
   changePassword,
+  changeUsername,
   RATE_LIMIT_MAX_REQUESTS,
   RATE_LIMIT_WINDOW_MS,
   SESSION_TTL_MS,
@@ -415,5 +416,79 @@ describe("changePassword", () => {
 
     const withPanelPassword = await login("admin", "panel-password", "2.2.2.6", env);
     expect(withPanelPassword.success).toBe(true);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// changeUsername — panel-driven username rotation
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe("changeUsername", () => {
+  it("updates the username so the new one logs in and the old one does not", async () => {
+    const env = makeEnv();
+    const ip = "3.3.3.1";
+
+    const result = await changeUsername("operations", "correct-password", ip, env);
+    expect(result.success).toBe(true);
+    expect(convex.state.credentials?.username).toBe("operations");
+
+    const withNew = await login("operations", "correct-password", ip, env);
+    expect(withNew.success).toBe(true);
+
+    const withOld = await login("admin", "correct-password", ip, env);
+    expect(withOld.success).toBe(false);
+  });
+
+  it("leaves the password hash untouched when only the username changes", async () => {
+    const env = makeEnv();
+
+    const result = await changeUsername("operations", "correct-password", "3.3.3.2", env);
+    expect(result.success).toBe(true);
+    expect(convex.state.credentials?.passwordHash).toBe(ENV_TEST_PASSWORD_HASH);
+  });
+
+  it("trims surrounding whitespace from the username", async () => {
+    const env = makeEnv();
+
+    const result = await changeUsername("  operations  ", "correct-password", "3.3.3.3", env);
+    expect(result.success).toBe(true);
+    expect(convex.state.credentials?.username).toBe("operations");
+  });
+
+  it("rejects an incorrect current password and leaves credentials untouched", async () => {
+    const env = makeEnv();
+
+    const result = await changeUsername("operations", "wrong-password", "3.3.3.4", env);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.reason).toBe("invalid_credentials");
+    }
+    expect(convex.state.credentials).toBeNull();
+  });
+
+  it("rejects a username shorter than the minimum length", async () => {
+    const env = makeEnv();
+
+    const result = await changeUsername("  a  ", "correct-password", "3.3.3.5", env);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.reason).toBe("invalid_username");
+    }
+    expect(convex.state.credentials).toBeNull();
+  });
+
+  it("shares the per-IP rate limit with login attempts", async () => {
+    const env = makeEnv();
+    const ip = "3.3.3.6";
+
+    for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
+      await checkRateLimit(ip, env);
+    }
+
+    const result = await changeUsername("operations", "correct-password", ip, env);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.reason).toBe("rate_limited");
+    }
   });
 });
