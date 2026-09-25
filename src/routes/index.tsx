@@ -12,37 +12,49 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import { getCompanyFn } from "@/api/company";
+import { listProductsFn } from "@/api/products";
+import { listSolutionsFn } from "@/api/solutions";
+import { listPackagesFn } from "@/api/packages";
+import { listProjectsFn } from "@/api/projects";
+import { listInsightsFn } from "@/api/insights";
+import { recordActivityFn } from "@/api/activity";
 import { ContactRail } from "@/components/contact-rail";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { useSectionReveal } from "@/hooks/use-site-effects";
 import { useComposeMail } from "@/hooks/use-compose-mail";
-import {
-  about,
-  company,
-  customers,
-  insights,
-  packages,
-  products,
-  projects,
-  services,
-  solutions,
-} from "@/data/site";
+import { company as staticCompany, customers } from "@/data/site";
 
+import aboutImage from "@/assets/brand/about.jpg";
 import heroFillerImage from "@/assets/brand/hero-filler.jpg";
 import heroLineImage from "@/assets/brand/hero-line.webp";
 import supportImage from "@/assets/brand/support.jpg";
 import supportTwoImage from "@/assets/brand/support2.jpg";
 
 export const Route = createFileRoute("/")({
+  loader: async () => {
+    const [company, products, solutions, packages, projects, insights] = await Promise.all([
+      getCompanyFn(),
+      listProductsFn(),
+      listSolutionsFn(),
+      listPackagesFn(),
+      listProjectsFn(),
+      listInsightsFn(),
+    ]);
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/", timestamp: new Date().toISOString() },
+    });
+    return { company, products, solutions, packages, projects, insights };
+  },
   head: () => ({
     meta: [
       { title: "Seven Zillions | Beverage Filling & Packaging Solutions" },
       {
         name: "description",
         content:
-          "Turnkey beverage production lines, filling machines and packaging systems for water, juice, carbonated drinks and cans.",
+          "Water, juice, carbonated and can lines at 2,000–36,000 containers per hour — treatment, filling, labeling, packing and palletizing.",
       },
       { property: "og:title", content: "Seven Zillions | Beverage Filling & Packaging Solutions" },
       {
@@ -91,24 +103,32 @@ const SUPPORT_CARDS = [
 ];
 
 function HomePage() {
+  const { company, products, solutions, packages, projects, insights } = Route.useLoaderData();
+
   const [slide, setSlide] = useState(0);
   const [cycle, setCycle] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const pausedRef = useRef(false);
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const heroRef = useRef<HTMLElement>(null);
-  const composeMail = useComposeMail();
+  const [sent, setSent] = useState(false);
+  const composeMail = useComposeMail(() => setSent(true));
   const theme = HERO_SLIDES[slide]?.theme ?? "light";
 
   useSectionReveal();
+
+  // The confirmation disappears on its own once the mail client has focus.
+  useEffect(() => {
+    if (!sent) return;
+    const timer = window.setTimeout(() => setSent(false), 7000);
+    return () => window.clearTimeout(timer);
+  }, [sent]);
 
   const goTo = useCallback((next: number) => {
     setSlide((next + HERO_SLIDES.length) % HERO_SLIDES.length);
     setCycle((value) => value + 1);
   }, []);
 
-  // Sticky header state + hero parallax (the transform lives on the <img> only,
-  // never on .hero or a header ancestor, so position: fixed keeps working).
   useEffect(() => {
     let frame = 0;
     const update = () => {
@@ -134,8 +154,6 @@ function HomePage() {
     };
   }, []);
 
-  // Auto-advancing carousel: 6.5s, paused on hover/focus/hidden tab,
-  // and restarted from the top whenever the visitor interacts.
   useEffect(() => {
     pausedRef.current = false;
     const timer = window.setInterval(() => {
@@ -145,12 +163,25 @@ function HomePage() {
     return () => window.clearInterval(timer);
   }, [cycle]);
 
+  function handleQuoteSubmit(event: React.FormEvent<HTMLFormElement>) {
+    void recordActivityFn({
+      data: {
+        eventType: "contact_submission",
+        path: "/",
+        timestamp: new Date().toISOString(),
+      },
+    });
+    composeMail(event);
+  }
+
   return (
     <main id="top" className={`hero-theme-${theme}`}>
       <SiteHeader />
 
       <section
         ref={heroRef}
+        id="main-content"
+        tabIndex={-1}
         className="hero"
         data-hero=""
         aria-roledescription="carousel"
@@ -207,13 +238,14 @@ function HomePage() {
         </div>
 
         <div className="shell hero-content">
-          <p className="hero-eyebrow">Turnkey beverage production line</p>
+          <p className="hero-eyebrow">2,000–36,000 containers per hour</p>
           <h1>
             Complete Beverage Filling <br />
             Line Solutions
           </h1>
           <p className="hero-copy">
-            Suitable for mineral water, juice, beverage and carbonated drinks.
+            Water, juice, carbonated and can lines — treatment, filling, labeling, packing and
+            palletizing.
           </p>
           <div className="hero-actions">
             <Link to="/products" className="primary-button">
@@ -223,7 +255,6 @@ function HomePage() {
               <MessageSquareText size={17} /> Plan your project
             </Link>
           </div>
-          {/* Slogan — stamped below the CTA buttons */}
           <p className="hero-slogan slogan" aria-hidden="true">
             {company.slogan}
           </p>
@@ -290,7 +321,7 @@ function HomePage() {
               params={{ slug: product.slug }}
               key={product.slug}
             >
-              <img src={product.image} alt={product.name} />
+              <img loading="lazy" decoding="async" src={product.image} alt={product.name} />
               <span className="image-shade" />
               <div>
                 <span className="card-index">0{index + 1}</span>
@@ -305,7 +336,12 @@ function HomePage() {
       <section id="about" className="about-section">
         <div className="shell about-grid">
           <div className="about-media">
-            <img src={about.image} alt="Seven Zillions beverage packaging machinery factory" />
+            <img
+              loading="lazy"
+              decoding="async"
+              src={aboutImage}
+              alt="Seven Zillions beverage packaging machinery factory"
+            />
             <div className="experience">
               <strong>20+</strong>
               <span>
@@ -318,9 +354,17 @@ function HomePage() {
           <div className="about-copy">
             <p className="eyebrow">About Seven Zillions</p>
             <h2>One partner from process planning to stable production</h2>
-            <p>{about.lead}</p>
+            <p>
+              Seven Zillions designs and builds industrial facilities, cleanrooms and high-tech
+              manufacturing sites — and delivers the engineering, technical services and equipment
+              that make them run.
+            </p>
             <ul>
-              {about.points.map((item) => (
+              {[
+                "A–Z line layout and utility planning",
+                "Factory testing and documented commissioning",
+                "Installation, training and spare-parts support",
+              ].map((item) => (
                 <li key={item}>
                   <span>
                     <Check size={15} />
@@ -352,7 +396,7 @@ function HomePage() {
               key={solution.slug}
             >
               <div className="solution-image">
-                <img src={solution.image} alt={solution.name} />
+                <img loading="lazy" decoding="async" src={solution.image} alt={solution.name} />
               </div>
               <div className="solution-copy">
                 <h3>{solution.name}</h3>
@@ -367,8 +411,8 @@ function HomePage() {
 
       <section id="packages" className="section shell packages-section">
         <SectionHeading
-          eyebrow="Investment summary"
-          title="Published package prices"
+          eyebrow="Complete packages"
+          title="What each package includes"
           action="All solutions"
           to="/solutions"
         />
@@ -377,8 +421,6 @@ function HomePage() {
             <article className="package-card" key={item.slug}>
               <div className="package-head">
                 <h3>{item.name}</h3>
-                <p className="package-price">{item.price}</p>
-                <p className="package-note">{item.priceNote}</p>
               </div>
               <p className="package-summary">{item.summary}</p>
               <dl className="spec-list">
@@ -410,11 +452,11 @@ function HomePage() {
       <section className="customers">
         <div className="shell customers-row">
           <div>
-            <p className="eyebrow light">Global customers</p>
+            <p className="eyebrow light">Markets we serve</p>
             <h2>
-              These customers
+              Production lines delivered
               <br />
-              choose to work with us
+              across Africa and Asia
             </h2>
           </div>
           <div className="logo-grid">
@@ -459,9 +501,9 @@ function HomePage() {
         />
         <div className="projects-grid">
           {projects.map((project) => (
-            <article className="project-card" key={project.title}>
+            <article className="project-card" key={project.id ?? project.title}>
               <Link to="/projects" className="project-image">
-                <img src={project.image} alt={project.title} />
+                <img loading="lazy" decoding="async" src={project.image} alt={project.title} />
               </Link>
               <time dateTime={project.date}>{project.date}</time>
               <h3>{project.title}</h3>
@@ -520,13 +562,26 @@ function HomePage() {
               ))}
               <span>
                 <MessageSquareText />{" "}
-                <a href={company.whatsappHref} target="_blank" rel="noreferrer">
+                <a
+                  href={company.whatsappHref}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={() =>
+                    void recordActivityFn({
+                      data: {
+                        eventType: "whatsapp_click",
+                        path: "/",
+                        timestamp: new Date().toISOString(),
+                      },
+                    })
+                  }
+                >
                   WhatsApp {company.whatsapp}
                 </a>
               </span>
             </div>
           </div>
-          <form className="quote-form" onSubmit={composeMail}>
+          <form className="quote-form" onSubmit={handleQuoteSubmit}>
             <div className="form-row">
               <label>
                 Name
@@ -553,6 +608,12 @@ function HomePage() {
             <button type="submit" className="primary-button">
               Get pricing & solutions <ArrowRight size={17} />
             </button>
+            {sent && (
+              <p className="form-sent" role="status">
+                <Check size={16} />
+                Your email app is opening with your message ready to send.
+              </p>
+            )}
           </form>
         </div>
       </section>

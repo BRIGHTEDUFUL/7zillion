@@ -1,5 +1,5 @@
 import { company } from "@/data/site";
-import { type FormEvent, type FormEventHandler } from "react";
+import { type FormEvent, type FormEventHandler, useRef } from "react";
 
 type Fields = {
   name?: string;
@@ -23,8 +23,14 @@ function read(form: HTMLFormElement): Fields {
  * There is no form backend on this project, so the quote form composes a
  * properly addressed email instead of silently discarding the visitor's
  * message. Swap this hook for a POST when an endpoint exists.
+ *
+ * `onComposed` fires once the mail client has been asked to open, so the form
+ * can tell the visitor what just happened instead of leaving a dead button.
  */
-export function useComposeMail(): FormEventHandler<HTMLFormElement> {
+export function useComposeMail(onComposed?: () => void): FormEventHandler<HTMLFormElement> {
+  const composedRef = useRef(onComposed);
+  composedRef.current = onComposed;
+
   return (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const form = event.currentTarget;
@@ -42,6 +48,7 @@ export function useComposeMail(): FormEventHandler<HTMLFormElement> {
     const subject = encodeURIComponent(`Line proposal request${name ? ` — ${name}` : ""}`);
     const body = encodeURIComponent(lines.join("\n"));
 
+    composedRef.current?.();
     window.location.href = `mailto:${company.email}?subject=${subject}&body=${body}`;
   };
 }

@@ -47,8 +47,27 @@ export function SiteHeader() {
     return () => desktop.removeEventListener("change", onChange);
   }, [menuOpen]);
 
+  // While the menu is open: hold the page still and let Escape dismiss it.
+  useEffect(() => {
+    if (!menuOpen) return;
+    document.body.classList.add("is-nav-locked");
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.body.classList.remove("is-nav-locked");
+      window.removeEventListener("keydown", onKeyDown);
+    };
+  }, [menuOpen]);
+
   return (
-    <header className={`site-header${scrolled ? " is-scrolled" : ""}`}>
+    <header
+      className={`site-header${scrolled ? " is-scrolled" : ""}${menuOpen ? " is-menu-open" : ""}`}
+    >
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
       <div className="shell nav-wrap">
         <Link to="/" className="brand" aria-label="Seven Zillions home">
           <BrandLogo />

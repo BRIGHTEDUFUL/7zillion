@@ -1,10 +1,19 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
+import { useMemo, useState } from "react";
 
+import { listProductsFn } from "@/api/products";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
-import { products } from "@/data/site";
 
 export const Route = createFileRoute("/products/")({
+  loader: async () => {
+    const products = await listProductsFn();
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/products", timestamp: new Date().toISOString() },
+    });
+    return products;
+  },
   head: () => ({
     meta: [
       { title: "Products | Seven Zillions — Filling, Treatment & Packaging Equipment" },
@@ -19,6 +28,16 @@ export const Route = createFileRoute("/products/")({
 });
 
 function ProductsPage() {
+  const products = Route.useLoaderData();
+  const [filter, setFilter] = useState("All");
+
+  const categories = useMemo(
+    () => ["All", ...Array.from(new Set(products.map((product) => product.category)))],
+    [products],
+  );
+  const visible =
+    filter === "All" ? products : products.filter((product) => product.category === filter);
+
   return (
     <InnerPage
       eyebrow="Product families"
@@ -27,8 +46,22 @@ function ProductsPage() {
       crumbs={[{ label: "Products" }]}
     >
       <section className="section shell">
+        <div className="filter-row" role="group" aria-label="Filter equipment by category">
+          {categories.map((category) => (
+            <button
+              key={category}
+              type="button"
+              className="filter-chip"
+              aria-pressed={filter === category}
+              onClick={() => setFilter(category)}
+            >
+              {category}
+            </button>
+          ))}
+        </div>
+
         <div className="card-grid">
-          {products.map((product, index) => (
+          {visible.map((product) => (
             <Link
               className="page-card"
               to="/products/$slug"
@@ -36,8 +69,8 @@ function ProductsPage() {
               key={product.slug}
             >
               <div className="page-card-media">
-                <img src={product.image} alt={product.name} />
-                <span className="card-index">0{index + 1}</span>
+                <img loading="lazy" decoding="async" src={product.image} alt={product.name} />
+                <span className="page-card-media-index">{product.category}</span>
               </div>
               <div className="page-card-body">
                 <span className="page-card-category">{product.category}</span>
@@ -50,6 +83,10 @@ function ProductsPage() {
             </Link>
           ))}
         </div>
+
+        {visible.length === 0 && (
+          <p className="wide-copy">No equipment in this category yet — tell us what you need.</p>
+        )}
       </section>
     </InnerPage>
   );

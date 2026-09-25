@@ -37,7 +37,7 @@ export function InnerPage({
     <main id="top" className="inner-page hero-theme-dark">
       <SiteHeader />
 
-      <section className="inner-hero">
+      <section className="inner-hero" id="main-content" tabIndex={-1}>
         <div className="shell">
           <Breadcrumbs items={crumbs} />
           <p className="eyebrow light">{eyebrow}</p>

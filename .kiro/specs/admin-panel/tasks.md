@@ -8,14 +8,14 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
 
 ## Tasks
 
-- [ ] 1. Foundation — types, schemas, storage, and infrastructure config
-  - [ ] 1.1 Extract shared TypeScript types to `src/types/content.ts`
+- [x] 1. Foundation — types, schemas, storage, and infrastructure config
+  - [x] 1.1 Extract shared TypeScript types to `src/types/content.ts`
     - Copy `Product`, `Solution`, `Package`, `Insight`, `Spec` (rename to `SpecEntry`) from `src/data/site.ts`
     - Add `Company`, `Project`, `Service`, `EventType`, `ActivityLogEntry` types as defined in the design
     - Export all types; update any existing imports in `src/data/site.ts` and public route files to import from `src/types/content.ts`
     - _Requirements: 3.1, 4.2, 5.2, 6.2, 7.2, 8.2, 9.1_
 
-  - [ ] 1.2 Create Zod validation schemas in `src/lib/schemas.ts`
+  - [x] 1.2 Create Zod validation schemas in `src/lib/schemas.ts`
     - Implement `CompanySchema`, `ProductSchema`, `SolutionSchema`, `PackageSchema`, `ProjectSchema`, `InsightSchema`, `ServiceSchema`, `ActivityEntrySchema`
     - Include `DateStringSchema` (`/^\d{4}-\d{2}-\d{2}$/`) for project dates
     - All required fields must use `.min(1)` or equivalent; `email` field uses `.email()`; `whatsappHref` uses `.url()`
@@ -32,19 +32,19 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
     - Use `fast-check` with Vitest; minimum 100 runs per property; tag each test as `Feature: admin-panel, Property {N}: {text}`
     - _Requirements: 3.3, 3.4, 4.7, 5.7, 6.7, 7.7, 7.8, 8.7, 9.5_
 
-  - [ ] 1.4 Write D1 migration SQL in `migrations/0001_initial.sql`
+  - [x] 1.4 Write D1 migration SQL in `migrations/0001_initial.sql`
     - Create all tables: `company`, `products`, `solutions`, `packages`, `insights`, `projects`, `services`, `activity_log`
     - Add indexes: `idx_activity_timestamp` (timestamp DESC), `idx_activity_type` (event_type)
     - Schema must match the design document exactly
     - _Requirements: 2.3, 3.2, 4.3, 5.3, 6.3, 7.3, 8.3, 9.2_
 
-  - [ ] 1.5 Update `wrangler.toml` with D1, KV, and R2 bindings
+  - [x] 1.5 Update `wrangler.toml` with D1, KV, and R2 bindings
     - Add `[[d1_databases]]` binding named `DB` pointing to the content database
     - Add `[[kv_namespaces]]` binding named `KV` for sessions and rate-limit counters
     - Add `[[r2_buckets]]` binding named `R2` for image storage
     - _Requirements: 1.4, 2.3, 10.3_
 
-  - [ ] 1.6 Implement the `ContentStore` adapter in `src/lib/content-store.ts`
+  - [x] 1.6 Implement the `ContentStore` adapter in `src/lib/content-store.ts`
     - Define and export the `ContentStore` interface and `CollectionName` union type exactly as specified in the design
     - Implement `D1ContentStore` class: all methods (`getCompany`, `setCompany`, `listItems`, `getItem`, `putItem`, `deleteItem`, `listProjects`, `putProject`, `deleteProject`, `getServices`, `setServices`, `appendActivity`, `queryActivity`)
     - Export a `getContentStore(env: Env): ContentStore` factory function that returns a `D1ContentStore`
@@ -63,8 +63,8 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
     - Generate two items with the same slug in the same collection and assert `DuplicateSlugError` is thrown; verify uniqueness is per-collection (same slug in different collections must not conflict)
     - _Requirements: 4.8, 5.8, 6.8, 8.8_
 
-- [ ] 2. Auth_Service — login, logout, session validation, rate limiting
-  - [ ] 2.1 Implement `src/lib/auth.ts` with `login`, `logout`, `validateSession`, and `checkRateLimit`
+- [x] 2. Auth_Service — login, logout, session validation, rate limiting
+  - [x] 2.1 Implement `src/lib/auth.ts` with `login`, `logout`, `validateSession`, and `checkRateLimit`
     - `login`: hash comparison via `bcryptjs`; on success write `session:{token}` to KV with 8-hour TTL; on failure return `{ success: false, reason: 'invalid_credentials' }`; call `checkRateLimit` before attempting validation and return `{ success: false, reason: 'rate_limited' }` if limit exceeded
     - `logout`: delete `session:{token}` key from KV
     - `validateSession`: KV lookup of `session:{token}`; return `{ valid: true, username }` or `{ valid: false }`
@@ -86,124 +86,124 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
     - Property 2: use `fc.record({ username: fc.string(), password: fc.string() })` and assert the response reason is always `'invalid_credentials'` (never a field-specific message) for any non-matching pair
     - _Requirements: 1.1, 1.3, 1.6_
 
-- [ ] 3. Content_API server functions
-  - [ ] 3.1 Implement `src/api/auth.ts` — `loginFn` and `logoutFn` server functions
+- [x] 3. Content_API server functions
+  - [x] 3.1 Implement `src/api/auth.ts` — `loginFn` and `logoutFn` server functions
     - `loginFn`: validate input with `z.object({ username, password })`; call `auth.login`; on success set HTTP-only `Secure` `SameSite=Strict` cookie (`admin_session`) with 8-hour max-age; redirect to `/admin/dashboard`; on `invalid_credentials` return error object; on `rate_limited` throw HTTP 429
     - `logoutFn`: call `auth.logout` with cookie value; clear cookie; redirect to `/admin/login`
     - _Requirements: 1.2, 1.4, 1.5, 1.7_
 
-  - [ ] 3.2 Implement `src/api/company.ts` — `getCompanyFn` and `updateCompanyFn`
+  - [x] 3.2 Implement `src/api/company.ts` — `getCompanyFn` and `updateCompanyFn`
     - `getCompanyFn`: no auth required (used by public routes); read from ContentStore
     - `updateCompanyFn`: require auth; validate with `CompanySchema`; write to ContentStore
     - _Requirements: 3.1, 3.2, 3.5_
 
-  - [ ] 3.3 Implement `src/api/products.ts` — `listProductsFn`, `upsertProductFn`, `deleteProductFn`
+  - [x] 3.3 Implement `src/api/products.ts` — `listProductsFn`, `upsertProductFn`, `deleteProductFn`
     - `listProductsFn`: no auth required; return all products
     - `upsertProductFn`: require auth; validate with `ProductSchema`; call `store.putItem` (which enforces slug uniqueness); surface `DuplicateSlugError` as `{ success: false, errors: { slug: 'already in use' } }`
     - `deleteProductFn`: require auth; validate `{ slug: z.string() }`; call `store.deleteItem`
     - _Requirements: 4.3, 4.5, 4.6, 4.8, 4.10_
 
-  - [ ] 3.4 Implement `src/api/solutions.ts` — `listSolutionsFn`, `upsertSolutionFn`, `deleteSolutionFn`
+  - [x] 3.4 Implement `src/api/solutions.ts` — `listSolutionsFn`, `upsertSolutionFn`, `deleteSolutionFn`
     - Mirror the product server functions pattern; use `SolutionSchema`; enforce slug uniqueness
     - _Requirements: 5.3, 5.5, 5.6, 5.8_
 
-  - [ ] 3.5 Implement `src/api/packages.ts` — `listPackagesFn`, `upsertPackageFn`, `deletePackageFn`
+  - [x] 3.5 Implement `src/api/packages.ts` — `listPackagesFn`, `upsertPackageFn`, `deletePackageFn`
     - Mirror the product server functions pattern; use `PackageSchema`; enforce slug uniqueness
     - _Requirements: 6.3, 6.5, 6.6, 6.8_
 
-  - [ ] 3.6 Implement `src/api/projects.ts` — `listProjectsFn`, `upsertProjectFn`, `deleteProjectFn`
+  - [x] 3.6 Implement `src/api/projects.ts` — `listProjectsFn`, `upsertProjectFn`, `deleteProjectFn`
     - `upsertProjectFn`: on create (no `id`), assign `id = crypto.randomUUID()` before writing; use `ProjectSchema`
     - `deleteProjectFn`: validate `{ id: z.string() }` and call `store.deleteProject`
     - _Requirements: 7.3, 7.5, 7.6_
 
-  - [ ] 3.7 Implement `src/api/insights.ts` — `listInsightsFn`, `upsertInsightFn`, `deleteInsightFn`
+  - [x] 3.7 Implement `src/api/insights.ts` — `listInsightsFn`, `upsertInsightFn`, `deleteInsightFn`
     - Mirror the product server functions pattern; use `InsightSchema`; enforce slug uniqueness
     - _Requirements: 8.3, 8.5, 8.6, 8.8_
 
-  - [ ] 3.8 Implement `src/api/services.ts` — `getServicesFn` and `updateServicesFn`
+  - [x] 3.8 Implement `src/api/services.ts` — `getServicesFn` and `updateServicesFn`
     - `getServicesFn`: no auth required; read from ContentStore
     - `updateServicesFn`: require auth; validate with `z.array(ServiceSchema)`; write full list to ContentStore
     - _Requirements: 9.2, 9.4_
 
-  - [ ] 3.9 Implement `src/api/activity.ts` — `recordActivityFn` and `queryActivityFn`
+  - [x] 3.9 Implement `src/api/activity.ts` — `recordActivityFn` and `queryActivityFn`
     - `recordActivityFn`: no auth required; validate input with `ActivityEntrySchema`; wrap D1 write in try/catch; on error call `console.error(err)` and return `{ ok: true }` (fire-and-forget, never propagate to caller)
     - `queryActivityFn`: require auth; accept `ActivityQueryOptions`; delegate to `store.queryActivity`; return results
     - _Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7_
 
-  - [ ] 3.10 Implement `src/api/upload.ts` — `getUploadUrlFn`
+  - [x] 3.10 Implement `src/api/upload.ts` — `getUploadUrlFn`
     - Require auth; validate `{ filename: z.string(), contentType: z.enum(['image/jpeg', 'image/png', 'image/webp']) }`; generate an R2 presigned PUT URL; return `{ uploadUrl, publicUrl }`
     - _Requirements: 10.3_
 
-  - [ ] 3.11 Add a shared `requireAuth` helper in `src/lib/require-auth.ts`
+  - [x] 3.11 Add a shared `requireAuth` helper in `src/lib/require-auth.ts`
     - Reads `admin_session` cookie from request context; calls `validateSession`; throws `redirect({ to: '/admin/login' })` if session is invalid
     - Import and call this helper in all server functions that mutate data
     - _Requirements: 1.1, 1.6_
 
-- [ ] 4. Checkpoint — server layer complete
+- [x] 4. Checkpoint — server layer complete
   - Ensure all server function files compile without TypeScript errors and all unit/property tests in tasks 1–3 pass. Ask the user if any questions arise before continuing.
 
-- [ ] 5. Admin route subtree — TanStack Router file-based routes
-  - [ ] 5.1 Create `src/routes/admin/__root.tsx` — `AdminShell` layout with auth guard
+- [x] 5. Admin route subtree — TanStack Router file-based routes
+  - [x] 5.1 Create `src/routes/admin/__root.tsx` — `AdminShell` layout with auth guard
     - Add `beforeLoad` hook that calls `validateSession`; redirects to `/admin/login` if session is invalid
     - Render `AdminShell` component (sidebar + topbar + `<Outlet />`); must NOT include `<SiteHeader>` or `<SiteFooter>`
     - _Requirements: 1.1, 1.6, 11.1, 11.3, 11.5_
 
-  - [ ] 5.2 Create `src/routes/admin/login.tsx` — `/admin/login` page
+  - [x] 5.2 Create `src/routes/admin/login.tsx` — `/admin/login` page
     - No auth guard; render `LoginPage` component; wire `loginFn` to form submit
     - _Requirements: 1.2, 1.3_
 
-  - [ ] 5.3 Create `src/routes/admin/dashboard.tsx` — `/admin/dashboard` page
+  - [x] 5.3 Create `src/routes/admin/dashboard.tsx` — `/admin/dashboard` page
     - Loader calls `queryActivityFn` for 30-day metrics and last-10 entries; render `ActivityWidget`
     - _Requirements: 2.1, 2.2_
 
-  - [ ] 5.4 Create `src/routes/admin/company.tsx` — `/admin/company` page
+  - [x] 5.4 Create `src/routes/admin/company.tsx` — `/admin/company` page
     - Loader calls `getCompanyFn`; render `ContentForm` pre-populated with current Company data; submit calls `updateCompanyFn`
     - _Requirements: 3.1, 3.2_
 
-  - [ ] 5.5 Create products sub-routes: `src/routes/admin/products/index.tsx`, `new.tsx`, `$slug.tsx`
+  - [x] 5.5 Create products sub-routes: `src/routes/admin/products/index.tsx`, `new.tsx`, `$slug.tsx`
     - `index.tsx` loader calls `listProductsFn`; renders `ContentList` with name, category, slug columns; links to `new` and `$slug` routes
     - `new.tsx` renders blank `ContentForm`; submit calls `upsertProductFn`
     - `$slug.tsx` loader calls server function to get single product; renders pre-populated `ContentForm`; submit calls `upsertProductFn`; delete button calls `deleteProductFn` after `ConfirmDialog`
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5, 4.6_
 
-  - [ ] 5.6 Create solutions sub-routes: `src/routes/admin/solutions/index.tsx`, `new.tsx`, `$slug.tsx`
+  - [x] 5.6 Create solutions sub-routes: `src/routes/admin/solutions/index.tsx`, `new.tsx`, `$slug.tsx`
     - Same pattern as products; columns: name, eyebrow, slug
     - _Requirements: 5.1, 5.2, 5.3, 5.4, 5.5, 5.6_
 
-  - [ ] 5.7 Create packages sub-routes: `src/routes/admin/packages/index.tsx`, `new.tsx`, `$slug.tsx`
-    - Same pattern as products; columns: name, price, slug
+  - [x] 5.7 Create packages sub-routes: `src/routes/admin/packages/index.tsx`, `new.tsx`, `$slug.tsx`
+    - Same pattern as products; columns: name, slug
     - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5, 6.6_
 
-  - [ ] 5.8 Create projects sub-routes: `src/routes/admin/projects/index.tsx`, `new.tsx`, `$id.tsx`
+  - [x] 5.8 Create projects sub-routes: `src/routes/admin/projects/index.tsx`, `new.tsx`, `$id.tsx`
     - Columns: title, date; keyed by `id` (UUID) not slug
     - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
 
-  - [ ] 5.9 Create insights sub-routes: `src/routes/admin/insights/index.tsx`, `new.tsx`, `$slug.tsx`
+  - [x] 5.9 Create insights sub-routes: `src/routes/admin/insights/index.tsx`, `new.tsx`, `$slug.tsx`
     - Columns: title, num, slug
     - _Requirements: 8.1, 8.2, 8.3, 8.4, 8.5, 8.6_
 
-  - [ ] 5.10 Create `src/routes/admin/services/index.tsx` — `/admin/services` page
+  - [x] 5.10 Create `src/routes/admin/services/index.tsx` — `/admin/services` page
     - Loader calls `getServicesFn`; renders full editable list of `{ title, copy }` items; submit calls `updateServicesFn` with entire updated list
     - _Requirements: 9.1, 9.2, 9.3, 9.4_
 
-- [ ] 6. Admin Shell UI components
-  - [ ] 6.1 Implement `src/components/admin/AdminShell.tsx`, `AdminSidebar.tsx`, `AdminTopBar.tsx`
+- [x] 6. Admin Shell UI components
+  - [x] 6.1 Implement `src/components/admin/AdminShell.tsx`, `AdminSidebar.tsx`, `AdminTopBar.tsx`
     - `AdminSidebar`: navigation links to Dashboard, Company, Products, Solutions, Packages, Projects, Insights, Services; highlight active route using TanStack Router's `useMatch` or active-link class
     - `AdminTopBar`: display authenticated username (from session); logout button calls `logoutFn`
     - `AdminShell`: responsive layout — sidebar visible at ≥ 768 px; sidebar collapses to hamburger menu on narrower viewports
     - _Requirements: 11.1, 11.2, 11.3, 11.4_
 
-  - [ ] 6.2 Implement `src/components/admin/ContentList.tsx`
+  - [x] 6.2 Implement `src/components/admin/ContentList.tsx`
     - Generic sortable table component; accepts `columns` (header + accessor) and `items` array props
     - Each row renders an Edit link and a Delete button that opens `ConfirmDialog`
     - _Requirements: 4.1, 5.1, 6.1, 7.1, 8.1_
 
-  - [ ] 6.3 Implement `src/components/admin/DynamicList.tsx` and `SpecEntryList.tsx`
+  - [x] 6.3 Implement `src/components/admin/DynamicList.tsx` and `SpecEntryList.tsx`
     - `DynamicList`: reorderable list of strings; supports add, remove, and drag-to-reorder (or up/down buttons); renders inline text inputs for each item
     - `SpecEntryList`: specialised `DynamicList` variant for `{ label: string; value: string }` pairs; renders two inputs per row
     - _Requirements: 4.9, 5.9, 6.9, 8.9_
 
-  - [ ] 6.4 Implement `src/components/admin/ImageUpload.tsx`
+  - [x] 6.4 Implement `src/components/admin/ImageUpload.tsx`
     - File input that validates MIME type ∈ `{image/jpeg, image/png, image/webp}` and size ≤ 5 MB before any network call; show format/size error if invalid
     - On valid file: call `getUploadUrlFn`; PUT file bytes directly to returned `uploadUrl`; on success set form field to `publicUrl` and render image preview
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5, 10.6_
@@ -214,71 +214,71 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
     - Use `fc.oneof` to generate invalid MIME strings and `fc.integer` for sizes > 5 MB; assert no network call is made and an error message is displayed
     - _Requirements: 10.2, 10.4, 10.5_
 
-  - [ ] 6.6 Implement `src/components/admin/ContentForm.tsx`
+  - [x] 6.6 Implement `src/components/admin/ContentForm.tsx`
     - Generic form wrapper; accepts a Zod schema for client-side validation; displays field-level errors inline on invalid submit; submit/cancel/delete button set; calls appropriate server function on submit
     - _Requirements: 3.3, 4.7, 5.7, 6.7, 7.7, 8.7, 9.5_
 
-  - [ ] 6.7 Implement `src/components/admin/ConfirmDialog.tsx`
+  - [x] 6.7 Implement `src/components/admin/ConfirmDialog.tsx`
     - Wraps Radix UI `AlertDialog`; accepts `title`, `description`, and `onConfirm` callback; renders a cancel and a confirm button
     - _Requirements: 4.6, 5.6, 6.6, 7.6, 8.6, 9.4_
 
-  - [ ] 6.8 Implement `src/components/admin/ActivityWidget.tsx`
+  - [x] 6.8 Implement `src/components/admin/ActivityWidget.tsx`
     - Metric cards: total page views, enquiry submissions, WhatsApp clicks, contact submissions — all filtered to last 30 days
     - Recent activity table: 10 most recent entries with event type, path/slug, and formatted timestamp columns
     - _Requirements: 2.1, 2.2_
 
-- [ ] 7. Checkpoint — admin UI complete
+- [x] 7. Checkpoint — admin UI complete
   - Ensure all admin route files and UI components compile, the sidebar navigation renders correctly, and the auth guard redirects unauthenticated users. Ask the user if any questions arise before continuing.
 
-- [ ] 8. Admin pages — connect forms to server functions
-  - [ ] 8.1 Wire login page: display validation error from `loginFn` response below the form; no field-specific hint (same generic message for all failure cases)
+- [x] 8. Admin pages — connect forms to server functions
+  - [x] 8.1 Wire login page: display validation error from `loginFn` response below the form; no field-specific hint (same generic message for all failure cases)
     - _Requirements: 1.2, 1.3_
 
-  - [ ] 8.2 Wire company page: client-side `CompanySchema` validation in `ContentForm`; on Zod failure show field errors; on server success show success toast; on server error show generic error toast
+  - [x] 8.2 Wire company page: client-side `CompanySchema` validation in `ContentForm`; on Zod failure show field errors; on server success show success toast; on server error show generic error toast
     - _Requirements: 3.2, 3.3, 3.4_
 
-  - [ ] 8.3 Wire products pages: `ContentForm` uses `ProductSchema`; `DynamicList` for `highlights`; `SpecEntryList` for `specs`; `ImageUpload` for `image`; duplicate-slug error from server surfaces on `slug` field
+  - [x] 8.3 Wire products pages: `ContentForm` uses `ProductSchema`; `DynamicList` for `highlights`; `SpecEntryList` for `specs`; `ImageUpload` for `image`; duplicate-slug error from server surfaces on `slug` field
     - _Requirements: 4.3, 4.5, 4.7, 4.8, 4.9_
 
-  - [ ] 8.4 Wire solutions pages: `ContentForm` uses `SolutionSchema`; `DynamicList` for `process` items (two sub-fields each), `equipment`, and `specs`; `ImageUpload` for `image`
+  - [x] 8.4 Wire solutions pages: `ContentForm` uses `SolutionSchema`; `DynamicList` for `process` items (two sub-fields each), `equipment`, and `specs`; `ImageUpload` for `image`
     - _Requirements: 5.3, 5.5, 5.7, 5.8, 5.9_
 
-  - [ ] 8.5 Wire packages pages: `ContentForm` uses `PackageSchema`; `DynamicList` for `includes`; `SpecEntryList` for `specs`
+  - [x] 8.5 Wire packages pages: `ContentForm` uses `PackageSchema`; `DynamicList` for `includes`; `SpecEntryList` for `specs`
     - _Requirements: 6.3, 6.5, 6.7, 6.8, 6.9_
 
-  - [ ] 8.6 Wire projects pages: `ContentForm` uses `ProjectSchema`; ISO date validation on `date` field; `ImageUpload` for `image`
+  - [x] 8.6 Wire projects pages: `ContentForm` uses `ProjectSchema`; ISO date validation on `date` field; `ImageUpload` for `image`
     - _Requirements: 7.3, 7.5, 7.7, 7.8_
 
-  - [ ] 8.7 Wire insights pages: `ContentForm` uses `InsightSchema`; `DynamicList` for `body` paragraphs; duplicate-slug error from server surfaces on `slug` field
+  - [x] 8.7 Wire insights pages: `ContentForm` uses `InsightSchema`; `DynamicList` for `body` paragraphs; duplicate-slug error from server surfaces on `slug` field
     - _Requirements: 8.3, 8.5, 8.7, 8.8, 8.9_
 
-  - [ ] 8.8 Wire services page: inline editable list of `{ title, copy }` items; add/remove item buttons; submit calls `updateServicesFn` with full updated array; field-level errors on empty `title` or `copy`
+  - [x] 8.8 Wire services page: inline editable list of `{ title, copy }` items; add/remove item buttons; submit calls `updateServicesFn` with full updated array; field-level errors on empty `title` or `copy`
     - _Requirements: 9.2, 9.3, 9.4, 9.5_
 
-- [ ] 9. Public route migration — replace static imports with server functions
-  - [ ] 9.1 Update `src/routes/index.tsx` (home page) loader to call `getCompanyFn` and any other data it reads from `src/data/site.ts`
+- [x] 9. Public route migration — replace static imports with server functions
+  - [x] 9.1 Update `src/routes/index.tsx` (home page) loader to call `getCompanyFn` and any other data it reads from `src/data/site.ts`
     - Remove the static import; call the appropriate server function(s) in the `loader`
     - _Requirements: 3.5_
 
-  - [ ] 9.2 Update `src/routes/products/index.tsx` and `src/routes/products/$slug.tsx` loaders to call `listProductsFn` / `getProductFn`
+  - [x] 9.2 Update `src/routes/products/index.tsx` and `src/routes/products/$slug.tsx` loaders to call `listProductsFn` / `getProductFn`
     - _Requirements: 4.10_
 
-  - [ ] 9.3 Update `src/routes/solutions/` loaders to call `listSolutionsFn` / `getSolutionFn`
+  - [x] 9.3 Update `src/routes/solutions/` loaders to call `listSolutionsFn` / `getSolutionFn`
     - _Requirements: 5.5 (no-cache guarantee)_
 
-  - [ ] 9.4 Update `src/routes/packages/` loaders to call `listPackagesFn` / `getPackageFn`
+  - [x] 9.4 Update `src/routes/packages/` loaders to call `listPackagesFn` / `getPackageFn`
     - _Requirements: 6.5 (no-cache guarantee)_
 
-  - [ ] 9.5 Update `src/routes/projects/` loaders to call `listProjectsFn`
+  - [x] 9.5 Update `src/routes/projects/` loaders to call `listProjectsFn`
     - _Requirements: 7.5 (no-cache guarantee)_
 
-  - [ ] 9.6 Update `src/routes/blog/` (insights) loaders to call `listInsightsFn` / `getInsightFn`
+  - [x] 9.6 Update `src/routes/blog/` (insights) loaders to call `listInsightsFn` / `getInsightFn`
     - _Requirements: 8.5 (no-cache guarantee)_
 
-  - [ ] 9.7 Update `src/routes/services/` loaders to call `getServicesFn`
+  - [x] 9.7 Update `src/routes/services/` loaders to call `getServicesFn`
     - _Requirements: 9.2 (no-cache guarantee)_
 
-  - [ ] 9.8 Update `src/routes/contact.tsx` and any route that reads `company` data to call `getCompanyFn`
+  - [x] 9.8 Update `src/routes/contact.tsx` and any route that reads `company` data to call `getCompanyFn`
     - _Requirements: 3.5_
 
   - [ ]* 9.9 Write property tests for no-cache data reading (Property 10)
@@ -287,18 +287,18 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
     - Use the in-memory ContentStore mock: write an item, then call the corresponding loader directly and assert the returned data matches the written item (no stale data)
     - _Requirements: 3.5, 4.10_
 
-- [ ] 10. Activity recording — wire events in public routes
-  - [ ] 10.1 Add `recordActivityFn` call to all public page loaders for `page_view` events
+- [x] 10. Activity recording — wire events in public routes
+  - [x] 10.1 Add `recordActivityFn` call to all public page loaders for `page_view` events
     - Include the route path in the `path` field; timestamp as `new Date().toISOString()`; call is fire-and-forget (do not await or surface errors)
     - _Requirements: 2.3_
 
-  - [ ] 10.2 Add `whatsapp_click` recording: find the WhatsApp link handler(s) in the public site and call `recordActivityFn` with event type `whatsapp_click`, the product slug or page context, and UTC timestamp
+  - [x] 10.2 Add `whatsapp_click` recording: find the WhatsApp link handler(s) in the public site and call `recordActivityFn` with event type `whatsapp_click`, the product slug or page context, and UTC timestamp
     - _Requirements: 2.4_
 
-  - [ ] 10.3 Add `contact_submission` recording: in the contact form submit handler, call `recordActivityFn` with event type `contact_submission` and UTC timestamp
+  - [x] 10.3 Add `contact_submission` recording: in the contact form submit handler, call `recordActivityFn` with event type `contact_submission` and UTC timestamp
     - _Requirements: 2.5_
 
-  - [ ] 10.4 Add `enquiry_submission` recording: in the enquiry/product-enquiry form submit handler, call `recordActivityFn` with event type `enquiry_submission`, the product `slug`, and UTC timestamp
+  - [x] 10.4 Add `enquiry_submission` recording: in the enquiry/product-enquiry form submit handler, call `recordActivityFn` with event type `enquiry_submission`, the product `slug`, and UTC timestamp
     - _Requirements: 2.6_
 
   - [ ]* 10.5 Write property tests for activity log (Properties 7, 8)
@@ -310,8 +310,8 @@ Introduces a protected admin management interface into the Seven Zillions TanSta
     - Property 8: generate lists of N ≥ 1 entries with distinct timestamps; call `queryActivity({ limit: 10 })`; assert count = min(N,10) and all returned entries have timestamps ≥ the 10th-most-recent
     - _Requirements: 2.2, 2.3, 2.4, 2.6_
 
-- [ ] 11. Data seeding — migrate `src/data/site.ts` into D1
-  - [ ] 11.1 Create `scripts/seed.ts` migration script
+- [x] 11. Data seeding — migrate `src/data/site.ts` into D1
+  - [x] 11.1 Create `scripts/seed.ts` migration script
     - Read all content from `src/data/site.ts` (products, solutions, packages, projects, insights, services, company)
     - Use the `ContentStore` adapter to write each item into D1 via `wrangler d1 execute` or a local `wrangler dev` connection
     - For projects: assign `id = crypto.randomUUID()` for each existing project record

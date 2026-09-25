@@ -1,11 +1,20 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
 
+import { listInsightsFn } from "@/api/insights";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { faqs, insights } from "@/data/site";
+import { faqs } from "@/data/site";
 
 export const Route = createFileRoute("/blog/")({
+  loader: async () => {
+    const insights = await listInsightsFn();
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/blog", timestamp: new Date().toISOString() },
+    });
+    return insights;
+  },
   head: () => ({
     meta: [
       { title: "Knowledge Center | Seven Zillions — Filling & Packaging Insights" },
@@ -20,6 +29,8 @@ export const Route = createFileRoute("/blog/")({
 });
 
 function BlogPage() {
+  const insights = Route.useLoaderData();
+
   return (
     <InnerPage
       eyebrow="Knowledge center"
@@ -53,7 +64,7 @@ function BlogPage() {
         />
         <div className="faq-list">
           {faqs.map((item) => (
-            <details key={item.q}>
+            <details key={item.q} name="faq">
               <summary>{item.q}</summary>
               <p>{item.a}</p>
             </details>

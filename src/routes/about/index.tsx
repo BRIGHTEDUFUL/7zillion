@@ -1,11 +1,20 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
+import { getServicesFn } from "@/api/services";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { about, company, customers, services } from "@/data/site";
+import { about, company, customers } from "@/data/site";
 
 export const Route = createFileRoute("/about/")({
+  loader: async () => {
+    const services = await getServicesFn();
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/about", timestamp: new Date().toISOString() },
+    });
+    return services;
+  },
   head: () => ({
     meta: [
       { title: "About Us | Seven Zillions — Cooperation and Interdependence" },
@@ -20,6 +29,8 @@ export const Route = createFileRoute("/about/")({
 });
 
 function AboutPage() {
+  const services = Route.useLoaderData();
+
   return (
     <InnerPage
       eyebrow="About Seven Zillions"
@@ -30,7 +41,12 @@ function AboutPage() {
       <section className="about-section about-section--inner">
         <div className="shell about-grid">
           <div className="about-media">
-            <img src={about.image} alt="Seven Zillions beverage packaging machinery factory" />
+            <img
+              loading="lazy"
+              decoding="async"
+              src={about.image}
+              alt="Seven Zillions beverage packaging machinery factory"
+            />
             <div className="experience">
               <strong>20+</strong>
               <span>
@@ -85,11 +101,11 @@ function AboutPage() {
       <section className="customers">
         <div className="shell customers-row">
           <div>
-            <p className="eyebrow light">Global customers</p>
+            <p className="eyebrow light">Markets we serve</p>
             <h2>
-              These customers
+              Production lines delivered
               <br />
-              choose to work with us
+              across Africa and Asia
             </h2>
           </div>
           <div className="logo-grid">

@@ -1,23 +1,37 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
+import { getSolutionFn, listSolutionsFn } from "@/api/solutions";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { solutionBySlug, solutions } from "@/data/site";
 
 export const Route = createFileRoute("/solutions/$slug")({
-  // Validated in the loader so an unknown slug produces a real server 404.
-  loader: ({ params }) => {
-    const solution = solutionBySlug(params.slug);
+  loader: async ({ params }) => {
+    const [solution, all] = await Promise.all([
+      getSolutionFn({ data: { slug: params.slug } }),
+      listSolutionsFn(),
+    ]);
     if (!solution) throw notFound();
-    return solution;
+    void recordActivityFn({
+      data: {
+        eventType: "page_view",
+        path: `/solutions/${params.slug}`,
+        slug: params.slug,
+        timestamp: new Date().toISOString(),
+      },
+    });
+    return { solution, all };
   },
-  head: ({ params }) => {
-    const solution = solutionBySlug(params.slug);
+  head: ({ loaderData }) => {
+    const solution = loaderData?.solution;
     return {
       meta: [
         { title: `${solution?.name ?? "Solution"} | Seven Zillions` },
-        { name: "description", content: solution?.summary ?? "Seven Zillions production lines." },
+        {
+          name: "description",
+          content: solution?.summary ?? "Seven Zillions production lines.",
+        },
       ],
     };
   },
@@ -25,9 +39,8 @@ export const Route = createFileRoute("/solutions/$slug")({
 });
 
 function SolutionDetailPage() {
-  const solution = Route.useLoaderData();
-
-  const related = solutions.filter((item) => item.slug !== solution.slug);
+  const { solution, all } = Route.useLoaderData();
+  const related = all.filter((item) => item.slug !== solution.slug);
 
   return (
     <InnerPage
@@ -39,7 +52,7 @@ function SolutionDetailPage() {
       <section className="section shell detail-layout">
         <div className="detail-main">
           <div className="detail-media">
-            <img src={solution.image} alt={solution.name} />
+            <img loading="lazy" decoding="async" src={solution.image} alt={solution.name} />
           </div>
           <p className="detail-lead">{solution.detail}</p>
 
@@ -108,7 +121,7 @@ function SolutionDetailPage() {
               key={item.slug}
             >
               <div className="page-card-media">
-                <img src={item.image} alt={item.name} />
+                <img loading="lazy" decoding="async" src={item.image} alt={item.name} />
               </div>
               <div className="page-card-body">
                 <span className="page-card-category">{item.eyebrow}</span>

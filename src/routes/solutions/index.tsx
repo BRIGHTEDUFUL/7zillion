@@ -1,18 +1,28 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
+import { listSolutionsFn } from "@/api/solutions";
+import { listPackagesFn } from "@/api/packages";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { extraSolutionLines, packages, solutions } from "@/data/site";
+import { extraSolutionLines } from "@/data/site";
 
 export const Route = createFileRoute("/solutions/")({
+  loader: async () => {
+    const [solutions, packages] = await Promise.all([listSolutionsFn(), listPackagesFn()]);
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/solutions", timestamp: new Date().toISOString() },
+    });
+    return { solutions, packages };
+  },
   head: () => ({
     meta: [
       { title: "Solutions | Seven Zillions — Complete Beverage Production Lines" },
       {
         name: "description",
         content:
-          "Water, juice, carbonated soft drink and cans filling production lines — process, equipment list, capacity and published package prices.",
+          "Water, juice, carbonated soft drink and cans filling production lines — process, equipment list, capacity and package scope.",
       },
     ],
   }),
@@ -20,6 +30,8 @@ export const Route = createFileRoute("/solutions/")({
 });
 
 function SolutionsPage() {
+  const { solutions, packages } = Route.useLoaderData();
+
   return (
     <InnerPage
       eyebrow="Production line solutions"
@@ -37,7 +49,7 @@ function SolutionsPage() {
               key={solution.slug}
             >
               <div className="page-card-media">
-                <img src={solution.image} alt={solution.name} />
+                <img loading="lazy" decoding="async" src={solution.image} alt={solution.name} />
                 <span className="card-index">0{index + 1}</span>
               </div>
               <div className="page-card-body">
@@ -68,14 +80,12 @@ function SolutionsPage() {
       </section>
 
       <section className="section shell packages-section">
-        <SectionHeading eyebrow="Investment summary" title="Published package prices" />
+        <SectionHeading eyebrow="Complete packages" title="What each package includes" />
         <div className="packages-grid">
           {packages.map((item) => (
             <article className="package-card" key={item.slug}>
               <div className="package-head">
                 <h3>{item.name}</h3>
-                <p className="package-price">{item.price}</p>
-                <p className="package-note">{item.priceNote}</p>
               </div>
               <p className="package-summary">{item.summary}</p>
               <dl className="spec-list">

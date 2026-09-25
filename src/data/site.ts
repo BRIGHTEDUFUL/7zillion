@@ -1,3 +1,17 @@
+import type { Insight, Package, Product, Solution, SpecEntry } from "@/types/content";
+export type {
+  Company,
+  EventType,
+  ActivityLogEntry,
+  Insight,
+  Package,
+  Product,
+  Project,
+  Service,
+  Solution,
+  SpecEntry,
+} from "@/types/content";
+
 import aboutImage from "@/assets/brand/about.jpg";
 import blowingImage from "@/assets/brand/product-blowing.jpg";
 import conveyorImage from "@/assets/brand/product-conveyor.jpg";
@@ -21,9 +35,9 @@ import projectWaterImage from "@/assets/brand/project-water.jpg";
  *             assembly, commissioning, training. Scope language, never a
  *             heading flourish.
  *   "Turnkey" a complete package that is ready to produce. It appears in a
- *             package's given name and as the single hero eyebrow — never as
- *             a suffix on a heading, and never within the same section as
- *             "A–Z".
+ *             package's given name — never as a suffix on a heading, never in
+ *             the home hero eyebrow (that line carries the real throughput
+ *             range), and never within the same section as "A–Z".
  *
  * Neither term is used as filler: if a phrase reads the same without it,
  * drop it.
@@ -59,7 +73,15 @@ export const navLinks = [
  * TanStack Router's generated path types stay satisfied.
  */
 export type StaticPath =
-  "/" | "/products" | "/solutions" | "/projects" | "/services" | "/about" | "/blog" | "/contact";
+  | "/"
+  | "/products"
+  | "/solutions"
+  | "/projects"
+  | "/services"
+  | "/about"
+  | "/blog"
+  | "/contact"
+  | "/admin";
 
 export type FooterLink =
   | { label: string; to: StaticPath; params?: undefined }
@@ -109,24 +131,13 @@ export const footerColumns: FooterColumn[] = [
       { label: "Services", to: "/services" },
       { label: "Knowledge center", to: "/blog" },
       { label: "Contact us", to: "/contact" },
+      { label: "Admin", to: "/admin" },
     ],
   },
 ];
 
-export type Spec = { label: string; value: string };
-
-export type Product = {
-  slug: string;
-  name: string;
-  category: string;
-  image: string;
-  summary: string;
-  detail: string;
-  detail2: string;
-  highlights: string[];
-  specs: Spec[];
-  whatsappMessage: string;
-};
+/** @deprecated Use SpecEntry from @/types/content instead */
+export type Spec = SpecEntry;
 
 export const products: Product[] = [
   {
@@ -313,19 +324,6 @@ export const products: Product[] = [
       "Hello Seven Zillions, I would like to enquire about your Conveyor Systems (air conveyors and buffer conveyors). Please send me more information.",
   },
 ];
-
-export type Solution = {
-  slug: string;
-  name: string;
-  image: string;
-  eyebrow: string;
-  summary: string;
-  detail: string;
-  capacity: string;
-  process: { title: string; copy: string }[];
-  equipment: string[];
-  specs: Spec[];
-};
 
 export const solutions: Solution[] = [
   {
@@ -528,22 +526,10 @@ export const extraSolutionLines = [
   "3–5 Gallon Water Production Line",
 ];
 
-export type Package = {
-  slug: string;
-  name: string;
-  price: string;
-  priceNote: string;
-  summary: string;
-  includes: string[];
-  specs: Spec[];
-};
-
 export const packages: Package[] = [
   {
     slug: "turnkey-water-line-3600",
     name: "Turnkey 3,600 BPH Mineral Water Production Line",
-    price: "9,830,230 GHS",
-    priceNote: "1 unit, full automatic",
     summary:
       "A complete factory setup from design through to training — not a machine sale, but a production-ready water plant.",
     includes: [
@@ -565,8 +551,6 @@ export const packages: Package[] = [
   {
     slug: "turnkey-blowing-line-5000",
     name: "Turnkey 5,000 BPH PET Bottle Blowing Line",
-    price: "2,830,230 GHS",
-    priceNote: "complete package",
     summary:
       "For producers who already hold preforms: a complete blowing factory for drinking water and beverage bottles, drawing to staff training included.",
     includes: [
@@ -675,19 +659,11 @@ export const projects = [
   },
   {
     date: "2023-12-11",
-    title: "25 T/H Nanofiltration Water Treatment System Delivered to Indonesia",
-    copy: "Seven Zillions delivered a 25 T/H nanofiltration water treatment system and air-compressor package for an Indonesian customer treating low-TDS water.",
+    title: "25 T/H Water Treatment System Commissioned in West Africa",
+    copy: "Seven Zillions designed and delivered a 25 T/H water treatment system and air-compressor package for a West African producer, achieving the required treated-water standard.",
     image: projectFilterImage,
   },
 ];
-
-export type Insight = {
-  num: string;
-  slug: string;
-  title: string;
-  copy: string;
-  body: string[];
-};
 
 export const insights: Insight[] = [
   {
@@ -783,16 +759,16 @@ export const about = {
 } as const;
 
 export const customers = [
-  "VONJO",
-  "CHOICE",
-  "AQUACLEAR",
-  "AQUAMIST",
-  "SHEGER",
-  "BRU",
-  "AQUAVITA",
-  "TAFANA",
-  "AMIAD",
-  "BALIPURE",
+  "Ghana",
+  "Nigeria",
+  "Ethiopia",
+  "Kenya",
+  "South Africa",
+  "Tanzania",
+  "Uganda",
+  "Côte d'Ivoire",
+  "Indonesia",
+  "China",
 ] as const;
 
 export const productBySlug = (slug: string) => products.find((item) => item.slug === slug);

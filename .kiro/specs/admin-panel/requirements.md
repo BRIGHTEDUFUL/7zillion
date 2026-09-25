@@ -17,7 +17,7 @@ Seven Zillions currently stores all site content in a single TypeScript file (`s
 - **Activity_Log**: A server-side record of visitor interactions — page views, enquiry form submissions, WhatsApp click events, and contact form submissions.
 - **Product**: A content item with fields: `slug`, `name`, `category`, `summary`, `detail`, `detail2`, `highlights`, `specs`, `whatsappMessage`, `image`.
 - **Solution**: A content item with fields: `slug`, `name`, `image`, `eyebrow`, `summary`, `detail`, `capacity`, `process`, `equipment`, `specs`.
-- **Package**: A pricing content item with fields: `slug`, `name`, `price`, `priceNote`, `summary`, `includes`, `specs`.
+- **Package**: A content item with fields: `slug`, `name`, `summary`, `includes`, `specs`. Prices are not stored or displayed anywhere.
 - **Project**: A portfolio item with fields: `date`, `title`, `copy`, `image`.
 - **Insight**: A blog article with fields: `num`, `slug`, `title`, `copy`, `body`.
 - **Company_Info**: The top-level company object with fields: `name`, `tagline`, `slogan`, `email`, `address`, `city`, `phones`, `whatsapp`, `whatsappHref`, `promise`, `founded`.
@@ -113,17 +113,17 @@ Seven Zillions currently stores all site content in a single TypeScript file (`s
 
 ### Requirement 6: Package Management
 
-**User Story:** As an Admin, I want to add, edit, and delete pricing packages, so that the packages section on the public site shows accurate pricing and scope.
+**User Story:** As an Admin, I want to add, edit, and delete packages, so that the packages section on the public site shows accurate scope.
 
 #### Acceptance Criteria
 
-1. WHEN an Admin navigates to `/admin/packages`, THE Admin_Panel SHALL display a list of all Packages with their `name`, `price`, and `slug`.
-2. WHEN an Admin clicks the add-package action, THE Admin_Panel SHALL display a form for all Package fields: `slug`, `name`, `price`, `priceNote`, `summary`, `includes` (ordered list of strings), and `specs` (ordered list of Spec_Entry items).
+1. WHEN an Admin navigates to `/admin/packages`, THE Admin_Panel SHALL display a list of all Packages with their `name` and `slug`.
+2. WHEN an Admin clicks the add-package action, THE Admin_Panel SHALL display a form for all Package fields: `slug`, `name`, `summary`, `includes` (ordered list of strings), and `specs` (ordered list of Spec_Entry items).
 3. WHEN an Admin submits the add-package form with valid data, THE Content_API SHALL add the Package to the Content_Store and display a success confirmation.
 4. WHEN an Admin clicks the edit action for an existing Package, THE Admin_Panel SHALL display the package form pre-populated with the current values for all Package fields.
 5. WHEN an Admin submits the edit-package form with valid data, THE Content_API SHALL update the Package in the Content_Store and display a success confirmation.
 6. WHEN an Admin clicks the delete action for a Package and confirms the deletion, THE Content_API SHALL remove the Package from the Content_Store and display a success confirmation.
-7. IF the Admin submits a package form with an empty `slug`, `name`, or `price` field, THEN THE Admin_Panel SHALL prevent submission and display a field-level validation error for each empty required field.
+7. IF the Admin submits a package form with an empty `slug` or `name` field, THEN THE Admin_Panel SHALL prevent submission and display a field-level validation error for each empty required field.
 8. IF the Admin enters a `slug` that is already used by another Package, THEN THE Admin_Panel SHALL prevent submission and display a duplicate-slug validation error.
 9. THE Admin_Panel SHALL allow the Admin to add, reorder, and remove individual items in the `includes` and `specs` lists within the package form.
 

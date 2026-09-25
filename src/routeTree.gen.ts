@@ -10,7 +10,11 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteRouteImport } from './routes/admin/route'
 import { Route as AboutIndexRouteImport } from './routes/about/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminAuthenticatedRouteImport } from './routes/admin/_authenticated'
+import { Route as AdminLoginRouteImport } from './routes/admin/login'
 import { Route as BlogIndexRouteImport } from './routes/blog/index'
 import { Route as ContactIndexRouteImport } from './routes/contact/index'
 import { Route as ProductsIndexRouteImport } from './routes/products/index'
@@ -19,16 +23,53 @@ import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as SolutionsIndexRouteImport } from './routes/solutions/index'
 import { Route as SolutionsSlugRouteImport } from './routes/solutions/$slug'
+import { Route as AdminAuthenticatedCompanyRouteImport } from './routes/admin/_authenticated/company'
+import { Route as AdminAuthenticatedDashboardRouteImport } from './routes/admin/_authenticated/dashboard'
+import { Route as AdminAuthenticatedInsightsIndexRouteImport } from './routes/admin/_authenticated/insights/index'
+import { Route as AdminAuthenticatedInsightsSlugRouteImport } from './routes/admin/_authenticated/insights/$slug'
+import { Route as AdminAuthenticatedInsightsNewRouteImport } from './routes/admin/_authenticated/insights/new'
+import { Route as AdminAuthenticatedPackagesIndexRouteImport } from './routes/admin/_authenticated/packages/index'
+import { Route as AdminAuthenticatedPackagesSlugRouteImport } from './routes/admin/_authenticated/packages/$slug'
+import { Route as AdminAuthenticatedPackagesNewRouteImport } from './routes/admin/_authenticated/packages/new'
+import { Route as AdminAuthenticatedProductsIndexRouteImport } from './routes/admin/_authenticated/products/index'
+import { Route as AdminAuthenticatedProductsSlugRouteImport } from './routes/admin/_authenticated/products/$slug'
+import { Route as AdminAuthenticatedProductsNewRouteImport } from './routes/admin/_authenticated/products/new'
+import { Route as AdminAuthenticatedProjectsIndexRouteImport } from './routes/admin/_authenticated/projects/index'
+import { Route as AdminAuthenticatedProjectsIdRouteImport } from './routes/admin/_authenticated/projects/$id'
+import { Route as AdminAuthenticatedProjectsNewRouteImport } from './routes/admin/_authenticated/projects/new'
+import { Route as AdminAuthenticatedServicesIndexRouteImport } from './routes/admin/_authenticated/services/index'
+import { Route as AdminAuthenticatedSolutionsIndexRouteImport } from './routes/admin/_authenticated/solutions/index'
+import { Route as AdminAuthenticatedSolutionsSlugRouteImport } from './routes/admin/_authenticated/solutions/$slug'
+import { Route as AdminAuthenticatedSolutionsNewRouteImport } from './routes/admin/_authenticated/solutions/new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRouteRoute = AdminRouteRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AboutIndexRoute = AboutIndexRouteImport.update({
   id: '/about/',
   path: '/about/',
   getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminAuthenticatedRoute = AdminAuthenticatedRouteImport.update({
+  id: '/_authenticated',
+  getParentRoute: () => AdminRouteRoute,
+} as any)
+const AdminLoginRoute = AdminLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => AdminRouteRoute,
 } as any)
 const BlogIndexRoute = BlogIndexRouteImport.update({
   id: '/blog/',
@@ -70,21 +111,152 @@ const SolutionsSlugRoute = SolutionsSlugRouteImport.update({
   path: '/solutions/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminAuthenticatedCompanyRoute =
+  AdminAuthenticatedCompanyRouteImport.update({
+    id: '/company',
+    path: '/company',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedDashboardRoute =
+  AdminAuthenticatedDashboardRouteImport.update({
+    id: '/dashboard',
+    path: '/dashboard',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedInsightsIndexRoute =
+  AdminAuthenticatedInsightsIndexRouteImport.update({
+    id: '/insights/',
+    path: '/insights/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedInsightsSlugRoute =
+  AdminAuthenticatedInsightsSlugRouteImport.update({
+    id: '/insights/$slug',
+    path: '/insights/$slug',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedInsightsNewRoute =
+  AdminAuthenticatedInsightsNewRouteImport.update({
+    id: '/insights/new',
+    path: '/insights/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedPackagesIndexRoute =
+  AdminAuthenticatedPackagesIndexRouteImport.update({
+    id: '/packages/',
+    path: '/packages/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedPackagesSlugRoute =
+  AdminAuthenticatedPackagesSlugRouteImport.update({
+    id: '/packages/$slug',
+    path: '/packages/$slug',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedPackagesNewRoute =
+  AdminAuthenticatedPackagesNewRouteImport.update({
+    id: '/packages/new',
+    path: '/packages/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedProductsIndexRoute =
+  AdminAuthenticatedProductsIndexRouteImport.update({
+    id: '/products/',
+    path: '/products/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedProductsSlugRoute =
+  AdminAuthenticatedProductsSlugRouteImport.update({
+    id: '/products/$slug',
+    path: '/products/$slug',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedProductsNewRoute =
+  AdminAuthenticatedProductsNewRouteImport.update({
+    id: '/products/new',
+    path: '/products/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedProjectsIndexRoute =
+  AdminAuthenticatedProjectsIndexRouteImport.update({
+    id: '/projects/',
+    path: '/projects/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedProjectsIdRoute =
+  AdminAuthenticatedProjectsIdRouteImport.update({
+    id: '/projects/$id',
+    path: '/projects/$id',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedProjectsNewRoute =
+  AdminAuthenticatedProjectsNewRouteImport.update({
+    id: '/projects/new',
+    path: '/projects/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedServicesIndexRoute =
+  AdminAuthenticatedServicesIndexRouteImport.update({
+    id: '/services/',
+    path: '/services/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSolutionsIndexRoute =
+  AdminAuthenticatedSolutionsIndexRouteImport.update({
+    id: '/solutions/',
+    path: '/solutions/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSolutionsSlugRoute =
+  AdminAuthenticatedSolutionsSlugRouteImport.update({
+    id: '/solutions/$slug',
+    path: '/solutions/$slug',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSolutionsNewRoute =
+  AdminAuthenticatedSolutionsNewRouteImport.update({
+    id: '/solutions/new',
+    path: '/solutions/new',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/about/': typeof AboutIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/contact/': typeof ContactIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/solutions/': typeof SolutionsIndexRoute
+  '/admin/company': typeof AdminAuthenticatedCompanyRoute
+  '/admin/dashboard': typeof AdminAuthenticatedDashboardRoute
+  '/admin/insights/$slug': typeof AdminAuthenticatedInsightsSlugRoute
+  '/admin/insights/new': typeof AdminAuthenticatedInsightsNewRoute
+  '/admin/packages/$slug': typeof AdminAuthenticatedPackagesSlugRoute
+  '/admin/packages/new': typeof AdminAuthenticatedPackagesNewRoute
+  '/admin/products/$slug': typeof AdminAuthenticatedProductsSlugRoute
+  '/admin/products/new': typeof AdminAuthenticatedProductsNewRoute
+  '/admin/projects/$id': typeof AdminAuthenticatedProjectsIdRoute
+  '/admin/projects/new': typeof AdminAuthenticatedProjectsNewRoute
+  '/admin/solutions/$slug': typeof AdminAuthenticatedSolutionsSlugRoute
+  '/admin/solutions/new': typeof AdminAuthenticatedSolutionsNewRoute
+  '/admin/insights/': typeof AdminAuthenticatedInsightsIndexRoute
+  '/admin/packages/': typeof AdminAuthenticatedPackagesIndexRoute
+  '/admin/products/': typeof AdminAuthenticatedProductsIndexRoute
+  '/admin/projects/': typeof AdminAuthenticatedProjectsIndexRoute
+  '/admin/services/': typeof AdminAuthenticatedServicesIndexRoute
+  '/admin/solutions/': typeof AdminAuthenticatedSolutionsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/admin/login': typeof AdminLoginRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/about': typeof AboutIndexRoute
@@ -94,36 +266,99 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsIndexRoute
   '/services': typeof ServicesIndexRoute
   '/solutions': typeof SolutionsIndexRoute
+  '/admin/company': typeof AdminAuthenticatedCompanyRoute
+  '/admin/dashboard': typeof AdminAuthenticatedDashboardRoute
+  '/admin/insights/$slug': typeof AdminAuthenticatedInsightsSlugRoute
+  '/admin/insights/new': typeof AdminAuthenticatedInsightsNewRoute
+  '/admin/packages/$slug': typeof AdminAuthenticatedPackagesSlugRoute
+  '/admin/packages/new': typeof AdminAuthenticatedPackagesNewRoute
+  '/admin/products/$slug': typeof AdminAuthenticatedProductsSlugRoute
+  '/admin/products/new': typeof AdminAuthenticatedProductsNewRoute
+  '/admin/projects/$id': typeof AdminAuthenticatedProjectsIdRoute
+  '/admin/projects/new': typeof AdminAuthenticatedProjectsNewRoute
+  '/admin/solutions/$slug': typeof AdminAuthenticatedSolutionsSlugRoute
+  '/admin/solutions/new': typeof AdminAuthenticatedSolutionsNewRoute
+  '/admin/insights': typeof AdminAuthenticatedInsightsIndexRoute
+  '/admin/packages': typeof AdminAuthenticatedPackagesIndexRoute
+  '/admin/products': typeof AdminAuthenticatedProductsIndexRoute
+  '/admin/projects': typeof AdminAuthenticatedProjectsIndexRoute
+  '/admin/services': typeof AdminAuthenticatedServicesIndexRoute
+  '/admin/solutions': typeof AdminAuthenticatedSolutionsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteRouteWithChildren
+  '/admin/_authenticated': typeof AdminAuthenticatedRouteWithChildren
+  '/admin/login': typeof AdminLoginRoute
   '/products/$slug': typeof ProductsSlugRoute
   '/solutions/$slug': typeof SolutionsSlugRoute
   '/about/': typeof AboutIndexRoute
+  '/admin/': typeof AdminIndexRoute
   '/blog/': typeof BlogIndexRoute
   '/contact/': typeof ContactIndexRoute
   '/products/': typeof ProductsIndexRoute
   '/projects/': typeof ProjectsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/solutions/': typeof SolutionsIndexRoute
+  '/admin/_authenticated/company': typeof AdminAuthenticatedCompanyRoute
+  '/admin/_authenticated/dashboard': typeof AdminAuthenticatedDashboardRoute
+  '/admin/_authenticated/insights/$slug': typeof AdminAuthenticatedInsightsSlugRoute
+  '/admin/_authenticated/insights/new': typeof AdminAuthenticatedInsightsNewRoute
+  '/admin/_authenticated/packages/$slug': typeof AdminAuthenticatedPackagesSlugRoute
+  '/admin/_authenticated/packages/new': typeof AdminAuthenticatedPackagesNewRoute
+  '/admin/_authenticated/products/$slug': typeof AdminAuthenticatedProductsSlugRoute
+  '/admin/_authenticated/products/new': typeof AdminAuthenticatedProductsNewRoute
+  '/admin/_authenticated/projects/$id': typeof AdminAuthenticatedProjectsIdRoute
+  '/admin/_authenticated/projects/new': typeof AdminAuthenticatedProjectsNewRoute
+  '/admin/_authenticated/solutions/$slug': typeof AdminAuthenticatedSolutionsSlugRoute
+  '/admin/_authenticated/solutions/new': typeof AdminAuthenticatedSolutionsNewRoute
+  '/admin/_authenticated/insights/': typeof AdminAuthenticatedInsightsIndexRoute
+  '/admin/_authenticated/packages/': typeof AdminAuthenticatedPackagesIndexRoute
+  '/admin/_authenticated/products/': typeof AdminAuthenticatedProductsIndexRoute
+  '/admin/_authenticated/projects/': typeof AdminAuthenticatedProjectsIndexRoute
+  '/admin/_authenticated/services/': typeof AdminAuthenticatedServicesIndexRoute
+  '/admin/_authenticated/solutions/': typeof AdminAuthenticatedSolutionsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
+    | '/admin/login'
     | '/products/$slug'
     | '/solutions/$slug'
     | '/about/'
+    | '/admin/'
     | '/blog/'
     | '/contact/'
     | '/products/'
     | '/projects/'
     | '/services/'
     | '/solutions/'
+    | '/admin/company'
+    | '/admin/dashboard'
+    | '/admin/insights/$slug'
+    | '/admin/insights/new'
+    | '/admin/packages/$slug'
+    | '/admin/packages/new'
+    | '/admin/products/$slug'
+    | '/admin/products/new'
+    | '/admin/projects/$id'
+    | '/admin/projects/new'
+    | '/admin/solutions/$slug'
+    | '/admin/solutions/new'
+    | '/admin/insights/'
+    | '/admin/packages/'
+    | '/admin/products/'
+    | '/admin/projects/'
+    | '/admin/services/'
+    | '/admin/solutions/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
+    | '/admin/login'
     | '/products/$slug'
     | '/solutions/$slug'
     | '/about'
@@ -133,22 +368,63 @@ export interface FileRouteTypes {
     | '/projects'
     | '/services'
     | '/solutions'
+    | '/admin/company'
+    | '/admin/dashboard'
+    | '/admin/insights/$slug'
+    | '/admin/insights/new'
+    | '/admin/packages/$slug'
+    | '/admin/packages/new'
+    | '/admin/products/$slug'
+    | '/admin/products/new'
+    | '/admin/projects/$id'
+    | '/admin/projects/new'
+    | '/admin/solutions/$slug'
+    | '/admin/solutions/new'
+    | '/admin/insights'
+    | '/admin/packages'
+    | '/admin/products'
+    | '/admin/projects'
+    | '/admin/services'
+    | '/admin/solutions'
   id:
     | '__root__'
     | '/'
+    | '/admin'
+    | '/admin/_authenticated'
+    | '/admin/login'
     | '/products/$slug'
     | '/solutions/$slug'
     | '/about/'
+    | '/admin/'
     | '/blog/'
     | '/contact/'
     | '/products/'
     | '/projects/'
     | '/services/'
     | '/solutions/'
+    | '/admin/_authenticated/company'
+    | '/admin/_authenticated/dashboard'
+    | '/admin/_authenticated/insights/$slug'
+    | '/admin/_authenticated/insights/new'
+    | '/admin/_authenticated/packages/$slug'
+    | '/admin/_authenticated/packages/new'
+    | '/admin/_authenticated/products/$slug'
+    | '/admin/_authenticated/products/new'
+    | '/admin/_authenticated/projects/$id'
+    | '/admin/_authenticated/projects/new'
+    | '/admin/_authenticated/solutions/$slug'
+    | '/admin/_authenticated/solutions/new'
+    | '/admin/_authenticated/insights/'
+    | '/admin/_authenticated/packages/'
+    | '/admin/_authenticated/products/'
+    | '/admin/_authenticated/projects/'
+    | '/admin/_authenticated/services/'
+    | '/admin/_authenticated/solutions/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRouteRoute: typeof AdminRouteRouteWithChildren
   ProductsSlugRoute: typeof ProductsSlugRoute
   SolutionsSlugRoute: typeof SolutionsSlugRoute
   AboutIndexRoute: typeof AboutIndexRoute
@@ -169,12 +445,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/about/': {
       id: '/about/'
       path: '/about'
       fullPath: '/about/'
       preLoaderRoute: typeof AboutIndexRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/_authenticated': {
+      id: '/admin/_authenticated'
+      path: ''
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminAuthenticatedRouteImport
+      parentRoute: typeof AdminRouteRoute
+    }
+    '/admin/login': {
+      id: '/admin/login'
+      path: '/login'
+      fullPath: '/admin/login'
+      preLoaderRoute: typeof AdminLoginRouteImport
+      parentRoute: typeof AdminRouteRoute
     }
     '/blog/': {
       id: '/blog/'
@@ -232,11 +536,199 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SolutionsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/_authenticated/company': {
+      id: '/admin/_authenticated/company'
+      path: '/company'
+      fullPath: '/admin/company'
+      preLoaderRoute: typeof AdminAuthenticatedCompanyRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/dashboard': {
+      id: '/admin/_authenticated/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminAuthenticatedDashboardRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/insights/': {
+      id: '/admin/_authenticated/insights/'
+      path: '/insights'
+      fullPath: '/admin/insights/'
+      preLoaderRoute: typeof AdminAuthenticatedInsightsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/insights/$slug': {
+      id: '/admin/_authenticated/insights/$slug'
+      path: '/insights/$slug'
+      fullPath: '/admin/insights/$slug'
+      preLoaderRoute: typeof AdminAuthenticatedInsightsSlugRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/insights/new': {
+      id: '/admin/_authenticated/insights/new'
+      path: '/insights/new'
+      fullPath: '/admin/insights/new'
+      preLoaderRoute: typeof AdminAuthenticatedInsightsNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/packages/': {
+      id: '/admin/_authenticated/packages/'
+      path: '/packages'
+      fullPath: '/admin/packages/'
+      preLoaderRoute: typeof AdminAuthenticatedPackagesIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/packages/$slug': {
+      id: '/admin/_authenticated/packages/$slug'
+      path: '/packages/$slug'
+      fullPath: '/admin/packages/$slug'
+      preLoaderRoute: typeof AdminAuthenticatedPackagesSlugRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/packages/new': {
+      id: '/admin/_authenticated/packages/new'
+      path: '/packages/new'
+      fullPath: '/admin/packages/new'
+      preLoaderRoute: typeof AdminAuthenticatedPackagesNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/products/': {
+      id: '/admin/_authenticated/products/'
+      path: '/products'
+      fullPath: '/admin/products/'
+      preLoaderRoute: typeof AdminAuthenticatedProductsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/products/$slug': {
+      id: '/admin/_authenticated/products/$slug'
+      path: '/products/$slug'
+      fullPath: '/admin/products/$slug'
+      preLoaderRoute: typeof AdminAuthenticatedProductsSlugRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/products/new': {
+      id: '/admin/_authenticated/products/new'
+      path: '/products/new'
+      fullPath: '/admin/products/new'
+      preLoaderRoute: typeof AdminAuthenticatedProductsNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/projects/': {
+      id: '/admin/_authenticated/projects/'
+      path: '/projects'
+      fullPath: '/admin/projects/'
+      preLoaderRoute: typeof AdminAuthenticatedProjectsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/projects/$id': {
+      id: '/admin/_authenticated/projects/$id'
+      path: '/projects/$id'
+      fullPath: '/admin/projects/$id'
+      preLoaderRoute: typeof AdminAuthenticatedProjectsIdRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/projects/new': {
+      id: '/admin/_authenticated/projects/new'
+      path: '/projects/new'
+      fullPath: '/admin/projects/new'
+      preLoaderRoute: typeof AdminAuthenticatedProjectsNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/services/': {
+      id: '/admin/_authenticated/services/'
+      path: '/services'
+      fullPath: '/admin/services/'
+      preLoaderRoute: typeof AdminAuthenticatedServicesIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/solutions/': {
+      id: '/admin/_authenticated/solutions/'
+      path: '/solutions'
+      fullPath: '/admin/solutions/'
+      preLoaderRoute: typeof AdminAuthenticatedSolutionsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/solutions/$slug': {
+      id: '/admin/_authenticated/solutions/$slug'
+      path: '/solutions/$slug'
+      fullPath: '/admin/solutions/$slug'
+      preLoaderRoute: typeof AdminAuthenticatedSolutionsSlugRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
+    '/admin/_authenticated/solutions/new': {
+      id: '/admin/_authenticated/solutions/new'
+      path: '/solutions/new'
+      fullPath: '/admin/solutions/new'
+      preLoaderRoute: typeof AdminAuthenticatedSolutionsNewRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
+interface AdminAuthenticatedRouteChildren {
+  AdminAuthenticatedCompanyRoute: typeof AdminAuthenticatedCompanyRoute
+  AdminAuthenticatedDashboardRoute: typeof AdminAuthenticatedDashboardRoute
+  AdminAuthenticatedInsightsSlugRoute: typeof AdminAuthenticatedInsightsSlugRoute
+  AdminAuthenticatedInsightsNewRoute: typeof AdminAuthenticatedInsightsNewRoute
+  AdminAuthenticatedPackagesSlugRoute: typeof AdminAuthenticatedPackagesSlugRoute
+  AdminAuthenticatedPackagesNewRoute: typeof AdminAuthenticatedPackagesNewRoute
+  AdminAuthenticatedProductsSlugRoute: typeof AdminAuthenticatedProductsSlugRoute
+  AdminAuthenticatedProductsNewRoute: typeof AdminAuthenticatedProductsNewRoute
+  AdminAuthenticatedProjectsIdRoute: typeof AdminAuthenticatedProjectsIdRoute
+  AdminAuthenticatedProjectsNewRoute: typeof AdminAuthenticatedProjectsNewRoute
+  AdminAuthenticatedSolutionsSlugRoute: typeof AdminAuthenticatedSolutionsSlugRoute
+  AdminAuthenticatedSolutionsNewRoute: typeof AdminAuthenticatedSolutionsNewRoute
+  AdminAuthenticatedInsightsIndexRoute: typeof AdminAuthenticatedInsightsIndexRoute
+  AdminAuthenticatedPackagesIndexRoute: typeof AdminAuthenticatedPackagesIndexRoute
+  AdminAuthenticatedProductsIndexRoute: typeof AdminAuthenticatedProductsIndexRoute
+  AdminAuthenticatedProjectsIndexRoute: typeof AdminAuthenticatedProjectsIndexRoute
+  AdminAuthenticatedServicesIndexRoute: typeof AdminAuthenticatedServicesIndexRoute
+  AdminAuthenticatedSolutionsIndexRoute: typeof AdminAuthenticatedSolutionsIndexRoute
+}
+
+const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
+  AdminAuthenticatedCompanyRoute: AdminAuthenticatedCompanyRoute,
+  AdminAuthenticatedDashboardRoute: AdminAuthenticatedDashboardRoute,
+  AdminAuthenticatedInsightsSlugRoute: AdminAuthenticatedInsightsSlugRoute,
+  AdminAuthenticatedInsightsNewRoute: AdminAuthenticatedInsightsNewRoute,
+  AdminAuthenticatedPackagesSlugRoute: AdminAuthenticatedPackagesSlugRoute,
+  AdminAuthenticatedPackagesNewRoute: AdminAuthenticatedPackagesNewRoute,
+  AdminAuthenticatedProductsSlugRoute: AdminAuthenticatedProductsSlugRoute,
+  AdminAuthenticatedProductsNewRoute: AdminAuthenticatedProductsNewRoute,
+  AdminAuthenticatedProjectsIdRoute: AdminAuthenticatedProjectsIdRoute,
+  AdminAuthenticatedProjectsNewRoute: AdminAuthenticatedProjectsNewRoute,
+  AdminAuthenticatedSolutionsSlugRoute: AdminAuthenticatedSolutionsSlugRoute,
+  AdminAuthenticatedSolutionsNewRoute: AdminAuthenticatedSolutionsNewRoute,
+  AdminAuthenticatedInsightsIndexRoute: AdminAuthenticatedInsightsIndexRoute,
+  AdminAuthenticatedPackagesIndexRoute: AdminAuthenticatedPackagesIndexRoute,
+  AdminAuthenticatedProductsIndexRoute: AdminAuthenticatedProductsIndexRoute,
+  AdminAuthenticatedProjectsIndexRoute: AdminAuthenticatedProjectsIndexRoute,
+  AdminAuthenticatedServicesIndexRoute: AdminAuthenticatedServicesIndexRoute,
+  AdminAuthenticatedSolutionsIndexRoute: AdminAuthenticatedSolutionsIndexRoute,
+}
+
+const AdminAuthenticatedRouteWithChildren =
+  AdminAuthenticatedRoute._addFileChildren(AdminAuthenticatedRouteChildren)
+
+interface AdminRouteRouteChildren {
+  AdminAuthenticatedRoute: typeof AdminAuthenticatedRouteWithChildren
+  AdminLoginRoute: typeof AdminLoginRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+}
+
+const AdminRouteRouteChildren: AdminRouteRouteChildren = {
+  AdminAuthenticatedRoute: AdminAuthenticatedRouteWithChildren,
+  AdminLoginRoute: AdminLoginRoute,
+  AdminIndexRoute: AdminIndexRoute,
+}
+
+const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
+  AdminRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRouteRoute: AdminRouteRouteWithChildren,
   ProductsSlugRoute: ProductsSlugRoute,
   SolutionsSlugRoute: SolutionsSlugRoute,
   AboutIndexRoute: AboutIndexRoute,

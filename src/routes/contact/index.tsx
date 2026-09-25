@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check, Mail, MapPin, MessageSquareText, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
 
+import { getCompanyFn } from "@/api/company";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
 import { useComposeMail } from "@/hooks/use-compose-mail";
-import { checklist, company } from "@/data/site";
+import { checklist } from "@/data/site";
 
 export const Route = createFileRoute("/contact/")({
+  loader: async () => {
+    const company = await getCompanyFn();
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/contact", timestamp: new Date().toISOString() },
+    });
+    return company;
+  },
   head: () => ({
     meta: [
       { title: "Contact Us | Seven Zillions — Kumasi, Ghana" },
@@ -21,7 +31,26 @@ export const Route = createFileRoute("/contact/")({
 });
 
 function ContactPage() {
-  const composeMail = useComposeMail();
+  const company = Route.useLoaderData();
+  const [sent, setSent] = useState(false);
+  const composeMail = useComposeMail(() => setSent(true));
+
+  useEffect(() => {
+    if (!sent) return;
+    const timer = window.setTimeout(() => setSent(false), 7000);
+    return () => window.clearTimeout(timer);
+  }, [sent]);
+
+  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    void recordActivityFn({
+      data: {
+        eventType: "contact_submission",
+        path: "/contact",
+        timestamp: new Date().toISOString(),
+      },
+    });
+    composeMail(event);
+  }
 
   return (
     <InnerPage
@@ -66,7 +95,20 @@ function ContactPage() {
               <MessageSquareText size={18} />
               <div>
                 <strong>
-                  <a href={company.whatsappHref} target="_blank" rel="noreferrer">
+                  <a
+                    href={company.whatsappHref}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={() =>
+                      void recordActivityFn({
+                        data: {
+                          eventType: "whatsapp_click",
+                          path: "/contact",
+                          timestamp: new Date().toISOString(),
+                        },
+                      })
+                    }
+                  >
                     {company.whatsapp}
                   </a>
                 </strong>
@@ -94,7 +136,7 @@ function ContactPage() {
           </div>
         </div>
 
-        <form className="quote-form quote-form--page" onSubmit={composeMail}>
+        <form className="quote-form quote-form--page" onSubmit={handleSubmit}>
           <div>
             <p className="eyebrow">Request a quotation</p>
             <h2>Get pricing & solutions</h2>
@@ -125,6 +167,12 @@ function ContactPage() {
           <button type="submit" className="primary-button">
             Send requirements <ArrowRight size={17} />
           </button>
+          {sent && (
+            <p className="form-sent" role="status">
+              <Check size={16} />
+              Your email app is opening with your message ready to send.
+            </p>
+          )}
           <p className="form-note">
             Your message opens in your email app addressed to {company.email} — no data is stored on
             this site.

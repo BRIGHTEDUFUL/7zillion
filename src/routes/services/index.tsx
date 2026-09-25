@@ -1,11 +1,20 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check } from "lucide-react";
 
+import { getServicesFn } from "@/api/services";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { acceptance, deliverySteps, services } from "@/data/site";
+import { acceptance, deliverySteps } from "@/data/site";
 
 export const Route = createFileRoute("/services/")({
+  loader: async () => {
+    const services = await getServicesFn();
+    void recordActivityFn({
+      data: { eventType: "page_view", path: "/services", timestamp: new Date().toISOString() },
+    });
+    return services;
+  },
   head: () => ({
     meta: [
       { title: "Services | Seven Zillions — Installation, Commissioning & Support" },
@@ -20,6 +29,8 @@ export const Route = createFileRoute("/services/")({
 });
 
 function ServicesPage() {
+  const services = Route.useLoaderData();
+
   return (
     <InnerPage
       eyebrow="Service resources"

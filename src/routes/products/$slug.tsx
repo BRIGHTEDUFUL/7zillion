@@ -1,18 +1,31 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
 import { ArrowRight, Check, MessageCircle, Mail, Phone } from "lucide-react";
 
+import { getProductFn, listProductsFn } from "@/api/products";
+import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { productBySlug, products, company } from "@/data/site";
+import { YouTubeEmbed } from "@/components/youtube-embed";
+import { company } from "@/data/site";
 
 export const Route = createFileRoute("/products/$slug")({
-  loader: ({ params }) => {
-    const product = productBySlug(params.slug);
+  loader: async ({ params }) => {
+    const product = await getProductFn({ data: { slug: params.slug } });
     if (!product) throw notFound();
-    return product;
+    void recordActivityFn({
+      data: {
+        eventType: "page_view",
+        path: `/products/${params.slug}`,
+        slug: params.slug,
+        timestamp: new Date().toISOString(),
+      },
+    });
+    // Load all products for the related section
+    const all = await listProductsFn();
+    return { product, all };
   },
-  head: ({ params }) => {
-    const product = productBySlug(params.slug);
+  head: ({ loaderData }) => {
+    const product = loaderData?.product;
     return {
       meta: [
         { title: `${product?.name ?? "Product"} | Seven Zillions` },
@@ -27,13 +40,13 @@ export const Route = createFileRoute("/products/$slug")({
 });
 
 function ProductDetailPage() {
-  const product = Route.useLoaderData();
+  const { product, all } = Route.useLoaderData();
 
   // Build pre-filled WhatsApp URL
-  const waHref = `${company.whatsappHref}?text=${encodeURIComponent(product.whatsappMessage)}`;
+  const waHref = `${company.whatsappHref}?text=${encodeURIComponent(product.whatsappMessage ?? "")}`;
 
   // Related: same category first, then fill with others, exclude self
-  const related = products
+  const related = all
     .filter((item) => item.slug !== product.slug)
     .sort((a) => (a.category === product.category ? -1 : 1))
     .slice(0, 3);
@@ -50,7 +63,7 @@ function ProductDetailPage() {
         {/* LEFT: content */}
         <div className="product-detail-main">
           <div className="product-detail-image">
-            <img src={product.image} alt={product.name} />
+            <img loading="lazy" decoding="async" src={product.image} alt={product.name} />
             <span className="product-detail-category">{product.category}</span>
           </div>
 
@@ -71,6 +84,13 @@ function ProductDetailPage() {
                 ))}
               </ul>
             </div>
+
+            {product.videoUrl && (
+              <div className="product-video" style={{ marginTop: "2rem" }}>
+                <h2 className="product-highlights-title">See it in action</h2>
+                <YouTubeEmbed videoUrl={product.videoUrl} title={`${product.name} video`} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -99,13 +119,23 @@ function ProductDetailPage() {
               technical and commercial proposal within 48 hours.
             </p>
 
-            {/* WhatsApp — primary CTA */}
+            {/* WhatsApp — primary CTA, records whatsapp_click */}
             <a
               href={waHref}
               target="_blank"
               rel="noreferrer"
               className="whatsapp-button"
               aria-label={`Enquire about ${product.name} on WhatsApp`}
+              onClick={() =>
+                void recordActivityFn({
+                  data: {
+                    eventType: "whatsapp_click",
+                    slug: product.slug,
+                    path: `/products/${product.slug}`,
+                    timestamp: new Date().toISOString(),
+                  },
+                })
+              }
             >
               <MessageCircle size={18} />
               WhatsApp us now
@@ -154,10 +184,8 @@ function ProductDetailPage() {
               key={item.slug}
             >
               <div className="page-card-media">
-                <img src={item.image} alt={item.name} />
-                <span className="card-index page-card-media-index">
-                  {item.category}
-                </span>
+                <img loading="lazy" decoding="async" src={item.image} alt={item.name} />
+                <span className="card-index page-card-media-index">{item.category}</span>
               </div>
               <div className="page-card-body">
                 <span className="page-card-category">{item.category}</span>

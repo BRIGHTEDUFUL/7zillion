@@ -399,8 +399,6 @@ export type Solution = {
 export type Package = {
   slug: string;
   name: string;
-  price: string;
-  priceNote: string;
   summary: string;
   includes: string[];
   specs: SpecEntry[];
@@ -529,7 +527,7 @@ export const ProjectSchema = z.object({
 - Company: `name`, `email`, `whatsappHref`
 - Product: `slug`, `name`, `category`, `summary`
 - Solution: `slug`, `name`, `summary`
-- Package: `slug`, `name`, `price`
+- Package: `slug`, `name`
 - Project: `title`, `copy`
 - Insight: `slug`, `title`, `copy`
 - Service item: `title`, `copy`
