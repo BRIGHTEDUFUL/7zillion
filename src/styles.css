@@ -2236,8 +2236,10 @@ html.is-ready .inner-intro {
     bottom: 26px;
     gap: 8px;
   }
+  /* 5 slides: the dots must narrow here or the footer (arrows + dots + counter)
+     overflows the 330px shell width on a 360px phone. */
   .hero-dot {
-    width: 34px;
+    width: 26px;
   }
   .hero-arrow {
     width: 36px;

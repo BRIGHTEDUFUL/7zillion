@@ -28,8 +28,11 @@ import { useComposeMail } from "@/hooks/use-compose-mail";
 import { company as staticCompany, customers } from "@/data/site";
 
 import aboutImage from "@/assets/brand/about.jpg";
+import heroConvertingImage from "@/assets/brand/hero-converting.webp";
 import heroFillerImage from "@/assets/brand/hero-filler.jpg";
 import heroLineImage from "@/assets/brand/hero-line.webp";
+import heroMachinesImage from "@/assets/brand/hero-machines.webp";
+import heroWaterTreatmentImage from "@/assets/brand/hero-water-treatment.webp";
 import supportImage from "@/assets/brand/support.jpg";
 import supportTwoImage from "@/assets/brand/support2.jpg";
 
@@ -73,9 +76,20 @@ export const Route = createFileRoute("/")({
 
 const HERO_INTERVAL = 6500;
 
+/*
+ * Hero rotation. Order matters twice over:
+ *   1. The first entry is the LCP image — __root.tsx preloads it and the <img>
+ *      below marks it eager/high priority. Never move a new slide to index 0.
+ *   2. Themes alternate light/dark so the shade over the left third (where the
+ *      headline sits) changes from slide to slide instead of white-washing every
+ *      bright factory photo the same way.
+ */
 const HERO_SLIDES = [
   { src: heroLineImage, theme: "light" },
   { src: heroFillerImage, theme: "dark" },
+  { src: heroMachinesImage, theme: "light" },
+  { src: heroWaterTreatmentImage, theme: "dark" },
+  { src: heroConvertingImage, theme: "light" },
 ] as const;
 
 const SUPPORT_CARDS = [
