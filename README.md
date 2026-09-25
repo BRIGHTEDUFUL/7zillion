@@ -53,6 +53,9 @@ node -e "const b=require('bcryptjs'); b.hash('your-password', 10).then(h => cons
 ```
 
 Copy the output into `.env` as `ADMIN_PASSWORD_HASH`.
+This pair is the **bootstrap** value — once you're inside the panel you can
+rotate the password from **Admin → Settings**; a changed password is stored in
+Convex and overrides the env values (they remain the fallback).
 
 ---
 
@@ -123,10 +126,13 @@ A template is at `.env.example`.
 ## Admin panel
 
 Visit `/admin` — you'll be redirected to `/admin/login`.
-Log in with the username and password whose hash is in `ADMIN_PASSWORD_HASH`.
+Log in with the username and password whose hash is in `ADMIN_PASSWORD_HASH`
+(or your current password if you already rotated it).
 
 The admin panel lets you manage:
 
 - Company info (name, contact details, slogan)
 - Products, Solutions, Packages, Insights, Projects, Services
 - Activity dashboard (page views, WhatsApp clicks, form submissions)
+- Settings — change the admin password (takes effect immediately, survives
+  redeploys)

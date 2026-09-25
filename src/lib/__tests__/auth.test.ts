@@ -11,6 +11,7 @@
  */
 
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
+import { hash, hashSync } from "bcryptjs";
 
 // Mock the server-only guard before importing auth.ts
 vi.mock("@tanstack/react-start/server-only", () => ({}));
@@ -19,6 +20,7 @@ import {
   checkRateLimit,
   validateSession,
   login,
+  changePassword,
   RATE_LIMIT_MAX_REQUESTS,
   RATE_LIMIT_WINDOW_MS,
   SESSION_TTL_MS,
@@ -36,15 +38,18 @@ const CONVEX_DEPLOY_KEY = "test-deploy-key";
 
 type Session = { token: string; username: string; createdAt: string; expiresAt: string };
 type RateLimit = { count: number; windowExpiresAt: string };
+type Credentials = { username: string; passwordHash: string } | null;
 
 interface ConvexMock {
   sessions: Map<string, Session>;
   rateLimits: Map<string, RateLimit>;
+  state: { credentials: Credentials };
 }
 
 function installConvexMock(): ConvexMock {
   const sessions = new Map<string, Session>();
   const rateLimits = new Map<string, RateLimit>();
+  const state: { credentials: Credentials } = { credentials: null };
 
   function checkAndIncrementRateLimit(key: string) {
     const now = Date.now();
@@ -84,6 +89,17 @@ function installConvexMock(): ConvexMock {
         return null;
       case "auth:checkAndIncrementRateLimit":
         return checkAndIncrementRateLimit(String(args["key"]));
+      case "auth:getAdminCredentials":
+        return state.credentials;
+      case "auth:setAdminCredentials":
+        state.credentials = {
+          username: String(args["username"]),
+          passwordHash: String(args["passwordHash"]),
+        };
+        return null;
+      case "auth:clearAdminCredentials":
+        state.credentials = null;
+        return null;
       default:
         throw new Error(`Unexpected Convex function "${path}"`);
     }
@@ -103,7 +119,7 @@ function installConvexMock(): ConvexMock {
 
   vi.stubGlobal("fetch", fetchMock);
 
-  return { sessions, rateLimits };
+  return { sessions, rateLimits, state };
 }
 
 let convex: ConvexMock;
@@ -121,11 +137,13 @@ afterEach(() => {
   delete process.env["CONVEX_DEPLOY_KEY"];
 });
 
+// bcrypt hash of "correct-password" (cost 10), computed once for all tests
+const ENV_TEST_PASSWORD_HASH = hashSync("correct-password", 10);
+
 function makeEnv(overrides: Partial<Env> = {}): Env {
   return {
     ADMIN_USERNAME: "admin",
-    // bcrypt hash for the string "correct-password"
-    ADMIN_PASSWORD_HASH: "$2b$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi",
+    ADMIN_PASSWORD_HASH: ENV_TEST_PASSWORD_HASH,
     ...overrides,
   };
 }
@@ -325,5 +343,77 @@ describe("login error messages", () => {
         expect(["invalid_credentials", "rate_limited"]).toContain(result.reason);
       }
     }
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// changePassword — panel-driven password rotation
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe("changePassword", () => {
+  it("updates the password so the new one logs in and the old one does not", async () => {
+    const env = makeEnv();
+    const ip = "2.2.2.1";
+
+    const result = await changePassword("correct-password", "brand-new-password", ip, env);
+    expect(result.success).toBe(true);
+    expect(convex.state.credentials).not.toBeNull();
+
+    const withNew = await login("admin", "brand-new-password", ip, env);
+    expect(withNew.success).toBe(true);
+
+    const withOld = await login("admin", "correct-password", ip, env);
+    expect(withOld.success).toBe(false);
+  });
+
+  it("rejects an incorrect current password and leaves credentials untouched", async () => {
+    const env = makeEnv();
+
+    const result = await changePassword("wrong-password", "brand-new-password", "2.2.2.2", env);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.reason).toBe("invalid_credentials");
+    }
+    expect(convex.state.credentials).toBeNull();
+  });
+
+  it("rejects a new password below the minimum length", async () => {
+    const env = makeEnv();
+
+    const result = await changePassword("correct-password", "short", "2.2.2.3", env);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.reason).toBe("weak_password");
+    }
+    expect(convex.state.credentials).toBeNull();
+  });
+
+  it("shares the per-IP rate limit with login attempts", async () => {
+    const env = makeEnv();
+    const ip = "2.2.2.4";
+
+    for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
+      await checkRateLimit(ip, env);
+    }
+
+    const result = await changePassword("correct-password", "brand-new-password", ip, env);
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.reason).toBe("rate_limited");
+    }
+  });
+
+  it("makes the panel-set password override the env bootstrap credentials", async () => {
+    const env = makeEnv();
+    convex.state.credentials = {
+      username: "admin",
+      passwordHash: await hash("panel-password", 10),
+    };
+
+    const withEnvPassword = await login("admin", "correct-password", "2.2.2.5", env);
+    expect(withEnvPassword.success).toBe(false);
+
+    const withPanelPassword = await login("admin", "panel-password", "2.2.2.6", env);
+    expect(withPanelPassword.success).toBe(true);
   });
 });

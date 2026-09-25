@@ -3,6 +3,7 @@ import {
   Building2,
   Factory,
   Gauge,
+  KeyRound,
   LayoutDashboard,
   Lightbulb,
   PackageOpen,
@@ -22,6 +23,7 @@ const navigation = [
   { to: "/admin/projects", label: "Projects", icon: Gauge, exact: false },
   { to: "/admin/insights", label: "Insights", icon: Lightbulb, exact: false },
   { to: "/admin/services", label: "Services", icon: Wrench, exact: false },
+  { to: "/admin/settings", label: "Settings", icon: KeyRound, exact: true },
 ] as const;
 
 interface AdminSidebarProps {

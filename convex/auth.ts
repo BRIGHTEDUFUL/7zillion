@@ -49,6 +49,36 @@ export const deleteSession = internalMutation({
   },
 });
 
+// ── Credentials (password changes made from the admin panel) ─────────────────
+
+export const getAdminCredentials = internalQuery({
+  args: {},
+  handler: async (ctx) => {
+    return await ctx.db.query("adminCredentials").first();
+  },
+});
+
+export const setAdminCredentials = internalMutation({
+  args: { username: v.string(), passwordHash: v.string() },
+  handler: async (ctx, { username, passwordHash }) => {
+    const existing = await ctx.db.query("adminCredentials").first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { username, passwordHash, updatedAt: Date.now() });
+      return;
+    }
+    await ctx.db.insert("adminCredentials", { username, passwordHash, updatedAt: Date.now() });
+  },
+});
+
+/** Remove the override so the env bootstrap credentials apply again. */
+export const clearAdminCredentials = internalMutation({
+  args: {},
+  handler: async (ctx) => {
+    const existing = await ctx.db.query("adminCredentials").first();
+    if (existing) await ctx.db.delete(existing._id);
+  },
+});
+
 // ── Rate limits ───────────────────────────────────────────────────────────────
 
 export const checkAndIncrementRateLimit = internalMutation({

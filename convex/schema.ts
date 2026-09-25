@@ -76,4 +76,13 @@ export default defineSchema({
     count: v.number(),
     windowExpiresAt: v.string(), // ISO timestamp
   }).index("by_key", ["key"]),
+
+  // ── Auth: password override set from the admin panel (Settings) ─────────
+  // Singleton (one row). When present it overrides ADMIN_USERNAME /
+  // ADMIN_PASSWORD_HASH from the environment; env stays the bootstrap value.
+  adminCredentials: defineTable({
+    username: v.string(),
+    passwordHash: v.string(), // bcrypt hash
+    updatedAt: v.number(), // ms epoch
+  }),
 });

@@ -1,6 +1,6 @@
 import "@tanstack/react-start/server-only";
 
-import { compare } from "bcryptjs";
+import { compare, hash } from "bcryptjs";
 
 import type { Env } from "@/lib/content-store";
 
@@ -16,6 +16,15 @@ export const RATE_LIMIT_WINDOW_SECONDS = RATE_LIMIT_WINDOW_MS / 1000;
 export type LoginResult =
   | { success: true; sessionToken: string }
   | { success: false; reason: "invalid_credentials" | "rate_limited" | "server_error" };
+
+export type ChangePasswordResult =
+  | { success: true }
+  | {
+      success: false;
+      reason: "invalid_credentials" | "rate_limited" | "weak_password" | "server_error";
+    };
+
+export const MIN_PASSWORD_LENGTH = 8;
 
 export type SessionValidation = { valid: true; username: string } | { valid: false };
 
@@ -106,6 +115,39 @@ export function rateLimitKey(ip: string, window: number): string {
 // login
 // ──────────────────────────────────────────────────────────────────────────────
 
+type EffectiveCredentials = { username: string; passwordHash: string };
+
+/**
+ * Resolve the admin credentials that are currently in effect.
+ *
+ * A password changed from the admin panel (Admin → Settings) is stored in the
+ * Convex `adminCredentials` singleton and overrides the env values; the env
+ * pair (ADMIN_USERNAME / ADMIN_PASSWORD_HASH) remains the bootstrap fallback
+ * when no override exists — or when Convex is unreachable, so an outage never
+ * locks the admin out of their own panel.
+ */
+async function effectiveCredentials(env: Env): Promise<EffectiveCredentials> {
+  try {
+    const row = await convexInternalQuery("auth:getAdminCredentials");
+    if (
+      isRecord(row) &&
+      typeof row["passwordHash"] === "string" &&
+      row["passwordHash"].length > 0
+    ) {
+      return {
+        username:
+          typeof row["username"] === "string" && row["username"].length > 0
+            ? row["username"]
+            : env.ADMIN_USERNAME,
+        passwordHash: row["passwordHash"],
+      };
+    }
+  } catch {
+    // Fall through to the env bootstrap credentials.
+  }
+  return { username: env.ADMIN_USERNAME, passwordHash: env.ADMIN_PASSWORD_HASH };
+}
+
 /**
  * Authenticate one administrator login attempt.
  * Rate-limit check happens before bcrypt so an attacker cannot use expensive
@@ -122,23 +164,22 @@ export async function login(
     return { success: false, reason: "rate_limited" };
   }
 
-  const configuredUsername = env.ADMIN_USERNAME;
-  const configuredHash = env.ADMIN_PASSWORD_HASH;
+  const creds = await effectiveCredentials(env);
   let passwordMatches = false;
 
   if (
     typeof password === "string" &&
-    typeof configuredHash === "string" &&
-    configuredHash.length > 0
+    typeof creds.passwordHash === "string" &&
+    creds.passwordHash.length > 0
   ) {
     try {
-      passwordMatches = await compare(password, configuredHash);
+      passwordMatches = await compare(password, creds.passwordHash);
     } catch {
       passwordMatches = false;
     }
   }
 
-  const usernameMatches = typeof username === "string" && username === configuredUsername;
+  const usernameMatches = typeof username === "string" && username === creds.username;
 
   if (!usernameMatches || !passwordMatches) {
     return { success: false, reason: "invalid_credentials" };
@@ -149,7 +190,7 @@ export async function login(
   try {
     await convexInternalMutation("auth:createSession", {
       token: sessionToken,
-      username: configuredUsername,
+      username: creds.username,
     });
   } catch (error) {
     console.error("Failed to persist session:", error);
@@ -159,6 +200,61 @@ export async function login(
   }
 
   return { success: true, sessionToken };
+}
+
+// ──────────────────────────────────────────────────────────────────────────────
+// changePassword
+// ──────────────────────────────────────────────────────────────────────────────
+
+/**
+ * Change the admin password from an authenticated session.
+ *
+ * Verifies the current password against the effective credentials, enforces a
+ * minimum length, then persists the new bcrypt hash to the Convex
+ * `adminCredentials` singleton so it survives restarts and redeploys (the env
+ * hash stays untouched as the bootstrap value).
+ */
+export async function changePassword(
+  currentPassword: string,
+  newPassword: string,
+  ip: string,
+  env: Env,
+): Promise<ChangePasswordResult> {
+  const allowed = await checkRateLimit(ip, env);
+  if (!allowed) {
+    return { success: false, reason: "rate_limited" };
+  }
+
+  const creds = await effectiveCredentials(env);
+
+  let currentMatches = false;
+  if (typeof currentPassword === "string" && creds.passwordHash.length > 0) {
+    try {
+      currentMatches = await compare(currentPassword, creds.passwordHash);
+    } catch {
+      currentMatches = false;
+    }
+  }
+  if (!currentMatches) {
+    return { success: false, reason: "invalid_credentials" };
+  }
+
+  if (typeof newPassword !== "string" || newPassword.length < MIN_PASSWORD_LENGTH) {
+    return { success: false, reason: "weak_password" };
+  }
+
+  try {
+    const passwordHash = await hash(newPassword, 10);
+    await convexInternalMutation("auth:setAdminCredentials", {
+      username: creds.username,
+      passwordHash,
+    });
+  } catch (error) {
+    console.error("Failed to persist new password:", error);
+    return { success: false, reason: "server_error" };
+  }
+
+  return { success: true };
 }
 
 // ──────────────────────────────────────────────────────────────────────────────

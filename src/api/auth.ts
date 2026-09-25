@@ -99,3 +99,57 @@ export const getSessionFn = createServerFn({ method: "GET" }).handler(async ({ c
 
   return { username: session.username };
 });
+
+const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Enter your current password."),
+  newPassword: z.string().min(8, "Use at least 8 characters."),
+  confirmPassword: z.string().min(1, "Confirm your new password."),
+});
+
+/**
+ * Change the admin password from the Settings page. Requires a valid session;
+ * the caller's current password is re-verified server-side before the new
+ * hash is persisted to Convex.
+ */
+export const changePasswordFn = createServerFn({ method: "POST" })
+  .validator(
+    changePasswordSchema.refine((values) => values.newPassword === values.confirmPassword, {
+      message: "Passwords do not match.",
+      path: ["confirmPassword"],
+    }),
+  )
+  .handler(async ({ data, context }) => {
+    const sessionToken = getCookie(ADMIN_SESSION_COOKIE);
+    if (!sessionToken) throw redirect({ to: LOGOUT_REDIRECT });
+
+    const session = await auth.validateSession(sessionToken, getApiEnv(context));
+    if (!session.valid) throw redirect({ to: LOGOUT_REDIRECT });
+
+    const result = await auth.changePassword(
+      data.currentPassword,
+      data.newPassword,
+      getClientIp(),
+      getApiEnv(context),
+    );
+
+    if (!result.success) {
+      switch (result.reason) {
+        case "rate_limited":
+          return {
+            success: false as const,
+            error: "Too many attempts. Please wait 15 minutes and try again.",
+          };
+        case "weak_password":
+          return {
+            success: false as const,
+            error: `Use a password of at least ${auth.MIN_PASSWORD_LENGTH} characters.`,
+          };
+        case "server_error":
+          return { success: false as const, error: "Could not save the new password. Try again." };
+        case "invalid_credentials":
+          return { success: false as const, error: "Current password is incorrect." };
+      }
+    }
+
+    return { success: true as const };
+  });

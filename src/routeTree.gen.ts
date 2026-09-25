@@ -25,6 +25,7 @@ import { Route as SolutionsIndexRouteImport } from './routes/solutions/index'
 import { Route as SolutionsSlugRouteImport } from './routes/solutions/$slug'
 import { Route as AdminAuthenticatedCompanyRouteImport } from './routes/admin/_authenticated/company'
 import { Route as AdminAuthenticatedDashboardRouteImport } from './routes/admin/_authenticated/dashboard'
+import { Route as AdminAuthenticatedSettingsRouteImport } from './routes/admin/_authenticated/settings'
 import { Route as AdminAuthenticatedInsightsIndexRouteImport } from './routes/admin/_authenticated/insights/index'
 import { Route as AdminAuthenticatedInsightsSlugRouteImport } from './routes/admin/_authenticated/insights/$slug'
 import { Route as AdminAuthenticatedInsightsNewRouteImport } from './routes/admin/_authenticated/insights/new'
@@ -121,6 +122,12 @@ const AdminAuthenticatedDashboardRoute =
   AdminAuthenticatedDashboardRouteImport.update({
     id: '/dashboard',
     path: '/dashboard',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
+const AdminAuthenticatedSettingsRoute =
+  AdminAuthenticatedSettingsRouteImport.update({
+    id: '/settings',
+    path: '/settings',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
 const AdminAuthenticatedInsightsIndexRoute =
@@ -236,6 +243,7 @@ export interface FileRoutesByFullPath {
   '/solutions/': typeof SolutionsIndexRoute
   '/admin/company': typeof AdminAuthenticatedCompanyRoute
   '/admin/dashboard': typeof AdminAuthenticatedDashboardRoute
+  '/admin/settings': typeof AdminAuthenticatedSettingsRoute
   '/admin/insights/$slug': typeof AdminAuthenticatedInsightsSlugRoute
   '/admin/insights/new': typeof AdminAuthenticatedInsightsNewRoute
   '/admin/packages/$slug': typeof AdminAuthenticatedPackagesSlugRoute
@@ -268,6 +276,7 @@ export interface FileRoutesByTo {
   '/solutions': typeof SolutionsIndexRoute
   '/admin/company': typeof AdminAuthenticatedCompanyRoute
   '/admin/dashboard': typeof AdminAuthenticatedDashboardRoute
+  '/admin/settings': typeof AdminAuthenticatedSettingsRoute
   '/admin/insights/$slug': typeof AdminAuthenticatedInsightsSlugRoute
   '/admin/insights/new': typeof AdminAuthenticatedInsightsNewRoute
   '/admin/packages/$slug': typeof AdminAuthenticatedPackagesSlugRoute
@@ -303,6 +312,7 @@ export interface FileRoutesById {
   '/solutions/': typeof SolutionsIndexRoute
   '/admin/_authenticated/company': typeof AdminAuthenticatedCompanyRoute
   '/admin/_authenticated/dashboard': typeof AdminAuthenticatedDashboardRoute
+  '/admin/_authenticated/settings': typeof AdminAuthenticatedSettingsRoute
   '/admin/_authenticated/insights/$slug': typeof AdminAuthenticatedInsightsSlugRoute
   '/admin/_authenticated/insights/new': typeof AdminAuthenticatedInsightsNewRoute
   '/admin/_authenticated/packages/$slug': typeof AdminAuthenticatedPackagesSlugRoute
@@ -338,6 +348,7 @@ export interface FileRouteTypes {
     | '/solutions/'
     | '/admin/company'
     | '/admin/dashboard'
+    | '/admin/settings'
     | '/admin/insights/$slug'
     | '/admin/insights/new'
     | '/admin/packages/$slug'
@@ -370,6 +381,7 @@ export interface FileRouteTypes {
     | '/solutions'
     | '/admin/company'
     | '/admin/dashboard'
+    | '/admin/settings'
     | '/admin/insights/$slug'
     | '/admin/insights/new'
     | '/admin/packages/$slug'
@@ -404,6 +416,7 @@ export interface FileRouteTypes {
     | '/solutions/'
     | '/admin/_authenticated/company'
     | '/admin/_authenticated/dashboard'
+    | '/admin/_authenticated/settings'
     | '/admin/_authenticated/insights/$slug'
     | '/admin/_authenticated/insights/new'
     | '/admin/_authenticated/packages/$slug'
@@ -550,6 +563,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedDashboardRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/settings': {
+      id: '/admin/_authenticated/settings'
+      path: '/settings'
+      fullPath: '/admin/settings'
+      preLoaderRoute: typeof AdminAuthenticatedSettingsRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
     '/admin/_authenticated/insights/': {
       id: '/admin/_authenticated/insights/'
       path: '/insights'
@@ -668,6 +688,7 @@ declare module '@tanstack/react-router' {
 interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedCompanyRoute: typeof AdminAuthenticatedCompanyRoute
   AdminAuthenticatedDashboardRoute: typeof AdminAuthenticatedDashboardRoute
+  AdminAuthenticatedSettingsRoute: typeof AdminAuthenticatedSettingsRoute
   AdminAuthenticatedInsightsSlugRoute: typeof AdminAuthenticatedInsightsSlugRoute
   AdminAuthenticatedInsightsNewRoute: typeof AdminAuthenticatedInsightsNewRoute
   AdminAuthenticatedPackagesSlugRoute: typeof AdminAuthenticatedPackagesSlugRoute
@@ -689,6 +710,7 @@ interface AdminAuthenticatedRouteChildren {
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedCompanyRoute: AdminAuthenticatedCompanyRoute,
   AdminAuthenticatedDashboardRoute: AdminAuthenticatedDashboardRoute,
+  AdminAuthenticatedSettingsRoute: AdminAuthenticatedSettingsRoute,
   AdminAuthenticatedInsightsSlugRoute: AdminAuthenticatedInsightsSlugRoute,
   AdminAuthenticatedInsightsNewRoute: AdminAuthenticatedInsightsNewRoute,
   AdminAuthenticatedPackagesSlugRoute: AdminAuthenticatedPackagesSlugRoute,

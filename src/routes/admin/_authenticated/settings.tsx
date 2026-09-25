@@ -1,0 +1,195 @@
+import { useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { KeyRound, LoaderCircle, ShieldCheck } from "lucide-react";
+import { z } from "zod";
+
+import { changePasswordFn } from "@/api/auth";
+import { PageHeader } from "@/components/admin/page-header";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+
+const SettingsSchema = z
+  .object({
+    currentPassword: z.string().min(1, "Enter your current password."),
+    newPassword: z.string().min(8, "Use at least 8 characters."),
+    confirmPassword: z.string().min(1, "Confirm your new password."),
+  })
+  .refine((values) => values.newPassword === values.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
+type SettingsValues = z.infer<typeof SettingsSchema>;
+
+export const Route = createFileRoute("/admin/_authenticated/settings")({
+  head: () => ({
+    meta: [
+      { title: "Settings | Seven Zillions" },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
+  component: SettingsPage,
+});
+
+function SettingsPage() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [saved, setSaved] = useState(false);
+  const form = useForm<SettingsValues>({
+    resolver: zodResolver(SettingsSchema),
+    defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
+  });
+  const formError = form.formState.errors.root?.["server"];
+
+  async function handleSubmit(values: SettingsValues) {
+    setIsSubmitting(true);
+    setSaved(false);
+    form.clearErrors("root.server");
+
+    try {
+      const result: unknown = await changePasswordFn({ data: values });
+      if (isRecord(result) && result["success"] === false) {
+        form.setError("root.server", {
+          type: "server",
+          message: String(result["error"] ?? "Could not update the password."),
+        });
+        return;
+      }
+
+      setSaved(true);
+      form.reset({ currentPassword: "", newPassword: "", confirmPassword: "" });
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "";
+      form.setError("root.server", {
+        type: "server",
+        message: /redirect/i.test(message)
+          ? "Your session has expired. Please sign in again."
+          : "Could not update the password. Try again.",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  }
+
+  return (
+    <div className="space-y-7">
+      <PageHeader
+        eyebrow="Account"
+        title="Settings"
+        description="Change the admin password for this workspace. The new password takes effect immediately and is kept across restarts."
+      />
+
+      <Card className="max-w-xl">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ShieldCheck className="size-5 text-primary" aria-hidden="true" />
+            Change password
+          </CardTitle>
+          <CardDescription>
+            Your current password is required. Sessions stay signed in after the change.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-5" noValidate>
+              {saved ? (
+                <Alert role="status">
+                  <ShieldCheck aria-hidden="true" />
+                  <AlertTitle>Password updated</AlertTitle>
+                  <AlertDescription>
+                    Use the new password the next time you sign in.
+                  </AlertDescription>
+                </Alert>
+              ) : null}
+
+              {formError?.message ? (
+                <Alert variant="destructive" role="alert">
+                  <KeyRound aria-hidden="true" />
+                  <AlertTitle>Change failed</AlertTitle>
+                  <AlertDescription>{String(formError.message)}</AlertDescription>
+                </Alert>
+              ) : null}
+
+              <FormField
+                control={form.control}
+                name="currentPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Current password</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        autoComplete="current-password"
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="newPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>New password</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        autoComplete="new-password"
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="confirmPassword"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Confirm new password</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        type="password"
+                        autoComplete="new-password"
+                        disabled={isSubmitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit" disabled={isSubmitting}>
+                {isSubmitting ? <LoaderCircle className="animate-spin" aria-hidden="true" /> : null}
+                {isSubmitting ? "Updating…" : "Update password"}
+              </Button>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === "object" && value !== null;
+}
