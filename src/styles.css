@@ -2127,6 +2127,10 @@ html.is-ready .inner-intro {
   .about-grid {
     gap: 50px;
   }
+  /* 100px was a desktop-sized gutter: it left the intro column ~270px on a tablet. */
+  .contact-grid {
+    gap: 50px;
+  }
   .solutions-grid {
     grid-template-columns: repeat(2, 1fr);
   }
@@ -2240,6 +2244,9 @@ html.is-ready .inner-intro {
      overflows the 330px shell width on a 360px phone. */
   .hero-dot {
     width: 26px;
+    /* keeps the 3px bar looking identical (centred) while giving the control a
+       tappable height instead of 14px */
+    height: 44px;
   }
   .hero-arrow {
     width: 36px;
@@ -2270,6 +2277,13 @@ html.is-ready .inner-intro {
   .featured-product {
     grid-column: auto;
   }
+  /* Below this width the two-column split squeezes the copy into ~170px (one word
+     per line) and the media column shrinks under the experience badge, clipping
+     "20+" down to "0+". Stack it like every other grid. */
+  .about-grid {
+    grid-template-columns: 1fr;
+    gap: 44px;
+  }
   .about-media img {
     height: 350px;
   }
@@ -2277,6 +2291,7 @@ html.is-ready .inner-intro {
     right: 0;
     bottom: -30px;
     width: 205px;
+    max-width: 100%;
   }
   .experience strong {
     font-size: 43px;
@@ -2313,6 +2328,12 @@ html.is-ready .inner-intro {
   }
   .contact-section {
     padding-block: 70px;
+  }
+  /* Same bug as .about-grid: 0.9fr/1.1fr + a 100px gutter squeezed the form to
+     ~124px wide and pushed it past the right edge of a phone screen. */
+  .contact-grid {
+    grid-template-columns: 1fr;
+    gap: 40px;
   }
   .quote-form {
     padding: 24px 18px;
