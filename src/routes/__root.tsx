@@ -6,6 +6,7 @@ import {
   useRouter,
   HeadContent,
   Scripts,
+  ScrollRestoration,
 } from "@tanstack/react-router";
 import { type ReactNode } from "react";
 
@@ -22,12 +23,24 @@ function NotFoundComponent() {
         <p className="mt-2 text-sm text-muted-foreground">
           The page you're looking for doesn't exist or has been moved.
         </p>
-        <div className="mt-6">
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-x-5 gap-y-3">
           <Link
             to="/"
             className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
           >
             Go home
+          </Link>
+          <Link
+            to="/products"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Browse products
+          </Link>
+          <Link
+            to="/contact"
+            className="text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+          >
+            Contact us
           </Link>
         </div>
       </div>
@@ -58,12 +71,12 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
           >
             Try again
           </button>
-          <a
-            href="/"
+          <Link
+            to="/"
             className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
           >
             Go home
-          </a>
+          </Link>
         </div>
       </div>
     </div>
@@ -129,6 +142,7 @@ function RootShell({ children }: { children: ReactNode }) {
       </head>
       <body>
         {children}
+        <ScrollRestoration />
         <Scripts />
       </body>
     </html>

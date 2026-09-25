@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { createFileRoute, useRouter } from "@tanstack/react-router";
+import { Link, createFileRoute, redirect, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Factory, Globe, LoaderCircle, LockKeyhole, ShieldCheck } from "lucide-react";
+import { ArrowLeft, Factory, Globe, LoaderCircle, LockKeyhole, ShieldCheck } from "lucide-react";
 
-import { loginFn } from "@/api/auth";
+import { getSessionFn, loginFn } from "@/api/auth";
 import { BrandLogo } from "@/components/logo";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
@@ -33,6 +33,17 @@ export const Route = createFileRoute("/admin/login")({
       { name: "robots", content: "noindex, nofollow" },
     ],
   }),
+  // An admin who is already signed in (or comes back after logging out in
+  // another tab) should never sit on the sign-in form — go straight in.
+  beforeLoad: async () => {
+    let username: string | undefined;
+    try {
+      username = (await getSessionFn())?.username;
+    } catch {
+      username = undefined;
+    }
+    if (username) throw redirect({ to: "/admin/dashboard" });
+  },
   component: LoginPage,
 });
 
@@ -230,6 +241,16 @@ function LoginPage() {
             <p className="mt-5 text-center text-xs leading-5 text-muted-foreground">
               Sessions expire automatically after eight hours.
             </p>
+
+            <div className="mt-4 flex justify-center">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+              >
+                <ArrowLeft className="size-3.5" aria-hidden="true" />
+                Back to the main site
+              </Link>
+            </div>
           </div>
         </div>
       </main>

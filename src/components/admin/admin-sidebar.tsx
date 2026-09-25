@@ -126,6 +126,7 @@ export function AdminSidebar({ onNavigate, className }: AdminSidebarProps) {
           href="/"
           target="_blank"
           rel="noreferrer"
+          onClick={onNavigate}
           className="flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
           View live site
