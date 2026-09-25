@@ -2,11 +2,10 @@ import { defineSchema, defineTable } from "convex/server";
 import { v } from "convex/values";
 
 /**
- * Convex schema — mirrors the D1 tables from migrations/0001_initial.sql.
+ * Convex schema — canonical content model for the site.
  *
  * Complex content objects (Product, Solution, etc.) are stored as JSON strings
- * inside a `data` field, matching the D1 pattern so the ContentStore adapter
- * can parse them identically.
+ * inside a `data` field; the ContentStore adapter parses them from that shape.
  */
 export default defineSchema({
   // ── Singleton: company info ──────────────────────────────────────────────

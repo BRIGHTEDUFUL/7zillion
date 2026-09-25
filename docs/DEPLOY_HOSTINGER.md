@@ -1,17 +1,17 @@
 # Deploying to Hostinger (Business / Cloud hosting)
 
 Target: **Hostinger Business Web Hosting or Cloud hosting** — the hPanel
-*Node.js web app* flow (Websites → Add Website). No SSH, no server admin
+_Node.js web app_ flow (Websites → Add Website). No SSH, no server admin
 required. This guide assumes the repo is on GitHub.
 
 ## How the pieces fit
 
-| Piece | Where it runs | Notes |
-|---|---|---|
-| TanStack Start SSR server | Hostinger Node.js web app | Built by Hostinger from source; entry `.output/server/index.mjs` |
-| Convex backend (database, auth sessions, file storage) | Convex cloud | Already live at `mild-dachshund-456`; Hostinger only talks to it over HTTPS |
-| Static assets (JS/CSS/images) | Served by the Node server | Bundled in `.output/public`; requests proxy through Hostinger to Node |
-| Image uploads | Client → Convex storage (presigned URL) | Nothing touches the Hostinger disk |
+| Piece                                                  | Where it runs                           | Notes                                                                       |
+| ------------------------------------------------------ | --------------------------------------- | --------------------------------------------------------------------------- |
+| TanStack Start SSR server                              | Hostinger Node.js web app               | Built by Hostinger from source; entry `.output/server/index.mjs`            |
+| Convex backend (database, auth sessions, file storage) | Convex cloud                            | Already live at `mild-dachshund-456`; Hostinger only talks to it over HTTPS |
+| Static assets (JS/CSS/images)                          | Served by the Node server               | Bundled in `.output/public`; requests proxy through Hostinger to Node       |
+| Image uploads                                          | Client → Convex storage (presigned URL) | Nothing touches the Hostinger disk                                          |
 
 ---
 
@@ -36,15 +36,15 @@ git push origin main
    owns the repo → select the repository → branch `main`.
 3. Review the deploy settings Hostinger detects and adjust to:
 
-| Field | Value |
-|---|---|
-| Framework preset | auto-detected (Vite/Nitro/Other) — leave as suggested |
-| Branch | `main` |
-| Node.js version | **24** (22 also works; 18 is too old for this project) |
-| Build command | `npm run build` |
-| Package manager | npm (auto-detected from `package-lock.json`) |
-| Output directory | *(leave empty — this is a server app)* |
-| Entry file | `.output/server/index.mjs` |
+| Field            | Value                                                  |
+| ---------------- | ------------------------------------------------------ |
+| Framework preset | auto-detected (Vite/Nitro/Other) — leave as suggested  |
+| Branch           | `main`                                                 |
+| Node.js version  | **24** (22 also works; 18 is too old for this project) |
+| Build command    | `npm run build`                                        |
+| Package manager  | npm (auto-detected from `package-lock.json`)           |
+| Output directory | _(leave empty — this is a server app)_                 |
+| Entry file       | `.output/server/index.mjs`                             |
 
 4. Click **Deploy**. Hostinger installs dependencies, runs `vite build`, and
    starts the server.
@@ -55,15 +55,15 @@ git push origin main
 ## 3. Set environment variables
 
 hPanel → your Node.js app → **Environment variables** → add each row (or
-*Import from .env* with your local `.env`):
+_Import from .env_ with your local `.env`):
 
-| Variable | Value |
-|---|---|
-| `CONVEX_URL` | `https://mild-dachshund-456.convex.cloud` |
-| `CONVEX_DEPLOY_KEY` | deploy key from Convex dashboard → Settings → Deploy key |
-| `ADMIN_USERNAME` | admin panel username |
-| `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password |
-| `NODE_ENV` | `production` |
+| Variable              | Value                                                    |
+| --------------------- | -------------------------------------------------------- |
+| `CONVEX_URL`          | `https://mild-dachshund-456.convex.cloud`                |
+| `CONVEX_DEPLOY_KEY`   | deploy key from Convex dashboard → Settings → Deploy key |
+| `ADMIN_USERNAME`      | admin panel username                                     |
+| `ADMIN_PASSWORD_HASH` | bcrypt hash of the admin password                        |
+| `NODE_ENV`            | `production`                                             |
 
 Notes:
 
@@ -104,28 +104,28 @@ Open these after the first deploy:
 
 ## 6. Ongoing operations
 
-| Task | How |
-|---|---|
-| Edit content (products, projects, prices… ) | Admin panel — saved to Convex instantly, no redeploy |
-| Ship code changes | `git push` (auto-deploy if connected) or hPanel → **Redeploy** |
-| Change Convex functions/schema | `npx convex deploy` locally (needs `CONVEX_DEPLOY_KEY`) |
-| Add a YouTube video | Admin → Projects or Products → **Video URL** field → paste any YouTube link |
-| View logs | hPanel → app → **Runtime Logs** |
-| Restart after env change | hPanel → app → **Restart** |
+| Task                                        | How                                                                         |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| Edit content (products, projects, prices… ) | Admin panel — saved to Convex instantly, no redeploy                        |
+| Ship code changes                           | `git push` (auto-deploy if connected) or hPanel → **Redeploy**              |
+| Change Convex functions/schema              | `npx convex deploy` locally (needs `CONVEX_DEPLOY_KEY`)                     |
+| Add a YouTube video                         | Admin → Projects or Products → **Video URL** field → paste any YouTube link |
+| View logs                                   | hPanel → app → **Runtime Logs**                                             |
+| Restart after env change                    | hPanel → app → **Restart**                                                  |
 
 ---
 
 ## 7. Troubleshooting
 
-| Symptom | Fix |
-|---|---|
-| Build green, site not responding | **Runtime Logs** — most often a missing env var (`CONVEX_URL environment variable is not set`) |
-| 403 after a redeploy | Stale `public_html/.htaccess` (generated, never hand-edit) → **Redeploy** regenerates it |
-| 502 / error page on every request | Check Runtime Logs, then confirm entry file is `.output/server/index.mjs` |
-| Env change has no effect | **Restart** the app |
-| Admin login always fails | Verify `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` in env vars; hash must be the full `$2b$10$...` string |
+| Symptom                             | Fix                                                                                                      |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Build green, site not responding    | **Runtime Logs** — most often a missing env var (`CONVEX_URL environment variable is not set`)           |
+| 403 after a redeploy                | Stale `public_html/.htaccess` (generated, never hand-edit) → **Redeploy** regenerates it                 |
+| 502 / error page on every request   | Check Runtime Logs, then confirm entry file is `.output/server/index.mjs`                                |
+| Env change has no effect            | **Restart** the app                                                                                      |
+| Admin login always fails            | Verify `ADMIN_USERNAME` / `ADMIN_PASSWORD_HASH` in env vars; hash must be the full `$2b$10$...` string   |
 | Edits made in File Manager vanished | Files under `hbuilds/` and `public_html` are overwritten on every deploy — change code in GitHub instead |
-| Deploy picked wrong Node version | App settings → Node.js version → 24 → redeploy |
+| Deploy picked wrong Node version    | App settings → Node.js version → 24 → redeploy                                                           |
 
 ---
 

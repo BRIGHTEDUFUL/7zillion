@@ -1,16 +1,16 @@
 # Seven Zillions
 
-Corporate website for **Seven Zillions** — *Cooperation and Interdependence*.
+Corporate website for **Seven Zillions** — _Cooperation and Interdependence_.
 Turnkey production lines and industrial engineering, Kumasi, Ghana — [www.sevenzillions.com](https://www.sevenzillions.com).
 
 ## Tech stack
 
-| Layer | Technology |
-|---|---|
-| Framework | TanStack Start (React SSR) |
-| Backend / database | [Convex](https://convex.dev) |
-| Hosting | Hostinger Node.js |
-| Admin panel | `/admin` route subtree with bcrypt auth |
+| Layer              | Technology                              |
+| ------------------ | --------------------------------------- |
+| Framework          | TanStack Start (React SSR)              |
+| Backend / database | [Convex](https://convex.dev)            |
+| Hosting            | Hostinger Node.js                       |
+| Admin panel        | `/admin` route subtree with bcrypt auth |
 
 ---
 
@@ -63,6 +63,7 @@ npm run build        # outputs to .output/
 ```
 
 The build produces:
+
 - `.output/server/index.mjs` — Node.js HTTP server entry point
 - `.output/public/` — static assets (JS, CSS, images)
 
@@ -85,13 +86,13 @@ Short version:
    - Node.js version: **24**
 4. **Set environment variables** in the app's panel:
 
-   | Variable | Value |
-   |---|---|
-   | `CONVEX_URL` | `https://mild-dachshund-456.convex.cloud` |
-   | `CONVEX_DEPLOY_KEY` | deploy key (Convex dashboard → Settings → Deploy key) |
-   | `ADMIN_USERNAME` | admin username |
-   | `ADMIN_PASSWORD_HASH` | bcrypt hash |
-   | `NODE_ENV` | `production` |
+   | Variable              | Value                                                 |
+   | --------------------- | ----------------------------------------------------- |
+   | `CONVEX_URL`          | `https://mild-dachshund-456.convex.cloud`             |
+   | `CONVEX_DEPLOY_KEY`   | deploy key (Convex dashboard → Settings → Deploy key) |
+   | `ADMIN_USERNAME`      | admin username                                        |
+   | `ADMIN_PASSWORD_HASH` | bcrypt hash                                           |
+   | `NODE_ENV`            | `production`                                          |
 
 5. **Verify**: `https://yourdomain.com/api/health` returns
    `{"ok":true,...}`, then load `/`, `/admin/login`, and log in.
@@ -106,14 +107,14 @@ npm run typecheck && npm run lint && npm test && npm run build
 
 ## Environment variables reference
 
-| Variable | Required | Description |
-|---|---|---|
-| `CONVEX_URL` | ✓ | Convex deployment URL (from Convex dashboard) |
-| `CONVEX_DEPLOY_KEY` | ✓ | Convex deploy key; lets the server call `internalMutation` and lets `npx convex deploy` push code |
-| `ADMIN_USERNAME` | ✓ | Admin panel login username |
-| `ADMIN_PASSWORD_HASH` | ✓ | bcrypt hash of admin password (cost 10) |
-| `NODE_ENV` | — | Set to `production` on Hostinger |
-| `PORT` | — | Port for the Node server (Hostinger assigns automatically) |
+| Variable              | Required | Description                                                                                       |
+| --------------------- | -------- | ------------------------------------------------------------------------------------------------- |
+| `CONVEX_URL`          | ✓        | Convex deployment URL (from Convex dashboard)                                                     |
+| `CONVEX_DEPLOY_KEY`   | ✓        | Convex deploy key; lets the server call `internalMutation` and lets `npx convex deploy` push code |
+| `ADMIN_USERNAME`      | ✓        | Admin panel login username                                                                        |
+| `ADMIN_PASSWORD_HASH` | ✓        | bcrypt hash of admin password (cost 10)                                                           |
+| `NODE_ENV`            | —        | Set to `production` on Hostinger                                                                  |
+| `PORT`                | —        | Port for the Node server (Hostinger assigns automatically)                                        |
 
 A template is at `.env.example`.
 
@@ -125,6 +126,7 @@ Visit `/admin` — you'll be redirected to `/admin/login`.
 Log in with the username and password whose hash is in `ADMIN_PASSWORD_HASH`.
 
 The admin panel lets you manage:
+
 - Company info (name, contact details, slogan)
 - Products, Solutions, Packages, Insights, Projects, Services
 - Activity dashboard (page views, WhatsApp clicks, form submissions)
