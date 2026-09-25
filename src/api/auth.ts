@@ -1,22 +1,30 @@
 import { createServerFn } from "@tanstack/react-start";
-import { redirect } from "@tanstack/react-router";
-import { deleteCookie, getCookie, getRequestIP, setCookie } from "@tanstack/react-start/server";
-import { z } from "zod";
+import {
+  deleteCookie,
+  getCookie,
+  getRequest,
+  getRequestIP,
+  setCookie,
+} from "@tanstack/react-start/server";
 
 import * as auth from "@/lib/auth";
+import {
+  SESSION_COOKIE_NAME,
+  SESSION_TTL_SECONDS,
+  changePasswordSchema,
+  changeUsernameSchema,
+  fail,
+  loginSchema,
+  type AuthResult,
+} from "@/lib/auth-contract";
 
 import { getApiEnv } from "./_internal";
 
-export const ADMIN_SESSION_COOKIE = "admin_session";
-const SESSION_MAX_AGE_SECONDS = 8 * 60 * 60;
-const DASHBOARD_REDIRECT = "/admin/dashboard";
-const LOGOUT_REDIRECT = "/admin/login";
-const GENERIC_LOGIN_ERROR = "Incorrect username or password";
-
-const loginSchema = z.object({
-  username: z.string(),
-  password: z.string(),
-});
+/**
+ * Every function here resolves to the shared `AuthResult` shape: `{ ok: true }`
+ * or `{ ok: false, code, message }`. The client shows `message` and branches on
+ * `code` — no redirects, thrown Responses or error-string matching.
+ */
 
 function getClientIp(): string {
   try {
@@ -28,19 +36,47 @@ function getClientIp(): string {
   }
 }
 
-function rateLimitedResponse(): Response {
-  return new Response("Too many login attempts", {
-    status: 429,
-    headers: {
-      "content-type": "text/plain; charset=utf-8",
-      "retry-after": String(15 * 60),
-    },
-  });
+/**
+ * The session cookie is `Secure` whenever the request actually arrived over
+ * HTTPS (directly or via a proxy reporting `x-forwarded-proto`). Plain-HTTP
+ * origins (local or LAN previews) get a non-Secure cookie, which is what makes
+ * those logins work at all instead of silently looping.
+ */
+function isSecureRequest(): boolean {
+  try {
+    const request = getRequest();
+    if (request.url.startsWith("https:")) return true;
+    const forwarded = request.headers.get("x-forwarded-proto");
+    if (forwarded) return forwarded.split(",")[0]?.trim() === "https";
+    return false;
+  } catch {
+    // No request context (unit/test calls) — keep the safe default.
+    return true;
+  }
+}
+
+function sessionCookieOptions(maxAgeSeconds?: number) {
+  return {
+    httpOnly: true,
+    secure: isSecureRequest(),
+    sameSite: "strict" as const,
+    path: "/",
+    ...(maxAgeSeconds !== undefined ? { maxAge: maxAgeSeconds } : {}),
+  };
+}
+
+/** Read and validate the session cookie, or null when it is missing/expired. */
+async function currentSession(context: unknown): Promise<{ username: string } | null> {
+  const token = getCookie(SESSION_COOKIE_NAME);
+  if (!token) return null;
+
+  const session = await auth.validateSession(token, getApiEnv(context));
+  return session.valid ? { username: session.username } : null;
 }
 
 export const loginFn = createServerFn({ method: "POST" })
   .validator(loginSchema)
-  .handler(async ({ data, context }) => {
+  .handler(async ({ data, context }): Promise<AuthResult> => {
     const result = await auth.login(
       data.username,
       data.password,
@@ -48,62 +84,27 @@ export const loginFn = createServerFn({ method: "POST" })
       getApiEnv(context),
     );
 
-    if (!result.success) {
-      if (result.reason === "rate_limited") {
-        throw rateLimitedResponse();
-      }
+    if (!result.ok) return result;
 
-      // Keep the response identical for an unknown username, a bad password,
-      // and both fields being wrong.
-      return {
-        success: false as const,
-        error: GENERIC_LOGIN_ERROR,
-      };
-    }
-
-    setCookie(ADMIN_SESSION_COOKIE, result.sessionToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: SESSION_MAX_AGE_SECONDS,
-      path: "/",
-    });
-
-    throw redirect({ to: DASHBOARD_REDIRECT });
+    setCookie(SESSION_COOKIE_NAME, result.sessionToken, sessionCookieOptions(SESSION_TTL_SECONDS));
+    return { ok: true };
   });
 
-export const logoutFn = createServerFn({ method: "POST" }).handler(async ({ context }) => {
-  const sessionToken = getCookie(ADMIN_SESSION_COOKIE);
+export const logoutFn = createServerFn({ method: "POST" }).handler(
+  async ({ context }): Promise<AuthResult> => {
+    const token = getCookie(SESSION_COOKIE_NAME);
+    if (token) await auth.logout(token, getApiEnv(context));
 
-  if (sessionToken) {
-    await auth.logout(sessionToken, getApiEnv(context));
-  }
-
-  deleteCookie(ADMIN_SESSION_COOKIE, {
-    httpOnly: true,
-    secure: true,
-    sameSite: "strict",
-    path: "/",
-  });
-
-  throw redirect({ to: LOGOUT_REDIRECT });
-});
+    deleteCookie(SESSION_COOKIE_NAME, sessionCookieOptions());
+    return { ok: true };
+  },
+);
 
 /** Read the current admin session for route guards (beforeLoad). */
 export const getSessionFn = createServerFn({ method: "GET" }).handler(async ({ context }) => {
-  const sessionToken = getCookie(ADMIN_SESSION_COOKIE);
-  if (!sessionToken) return null;
-
-  const session = await auth.validateSession(sessionToken, getApiEnv(context));
-  if (!session.valid) return null;
-
+  const session = await currentSession(context);
+  if (!session) return null;
   return { username: session.username };
-});
-
-const changePasswordSchema = z.object({
-  currentPassword: z.string().min(1, "Enter your current password."),
-  newPassword: z.string().min(8, "Use at least 8 characters."),
-  confirmPassword: z.string().min(1, "Confirm your new password."),
 });
 
 /**
@@ -112,52 +113,17 @@ const changePasswordSchema = z.object({
  * hash is persisted to Convex.
  */
 export const changePasswordFn = createServerFn({ method: "POST" })
-  .validator(
-    changePasswordSchema.refine((values) => values.newPassword === values.confirmPassword, {
-      message: "Passwords do not match.",
-      path: ["confirmPassword"],
-    }),
-  )
-  .handler(async ({ data, context }) => {
-    const sessionToken = getCookie(ADMIN_SESSION_COOKIE);
-    if (!sessionToken) throw redirect({ to: LOGOUT_REDIRECT });
+  .validator(changePasswordSchema)
+  .handler(async ({ data, context }): Promise<AuthResult> => {
+    if (!(await currentSession(context))) return fail("session_expired");
 
-    const session = await auth.validateSession(sessionToken, getApiEnv(context));
-    if (!session.valid) throw redirect({ to: LOGOUT_REDIRECT });
-
-    const result = await auth.changePassword(
+    return auth.changePassword(
       data.currentPassword,
       data.newPassword,
       getClientIp(),
       getApiEnv(context),
     );
-
-    if (!result.success) {
-      switch (result.reason) {
-        case "rate_limited":
-          return {
-            success: false as const,
-            error: "Too many attempts. Please wait 15 minutes and try again.",
-          };
-        case "weak_password":
-          return {
-            success: false as const,
-            error: `Use a password of at least ${auth.MIN_PASSWORD_LENGTH} characters.`,
-          };
-        case "server_error":
-          return { success: false as const, error: "Could not save the new password. Try again." };
-        case "invalid_credentials":
-          return { success: false as const, error: "Current password is incorrect." };
-      }
-    }
-
-    return { success: true as const };
   });
-
-const changeUsernameSchema = z.object({
-  username: z.string().trim().min(1, "Enter a username."),
-  currentPassword: z.string().min(1, "Enter your current password."),
-});
 
 /**
  * Change the admin username from the Settings page. Same bar as a password
@@ -166,38 +132,13 @@ const changeUsernameSchema = z.object({
  */
 export const changeUsernameFn = createServerFn({ method: "POST" })
   .validator(changeUsernameSchema)
-  .handler(async ({ data, context }) => {
-    const sessionToken = getCookie(ADMIN_SESSION_COOKIE);
-    if (!sessionToken) throw redirect({ to: LOGOUT_REDIRECT });
+  .handler(async ({ data, context }): Promise<AuthResult> => {
+    if (!(await currentSession(context))) return fail("session_expired");
 
-    const session = await auth.validateSession(sessionToken, getApiEnv(context));
-    if (!session.valid) throw redirect({ to: LOGOUT_REDIRECT });
-
-    const result = await auth.changeUsername(
+    return auth.changeUsername(
       data.username,
       data.currentPassword,
       getClientIp(),
       getApiEnv(context),
     );
-
-    if (!result.success) {
-      switch (result.reason) {
-        case "rate_limited":
-          return {
-            success: false as const,
-            error: "Too many attempts. Please wait 15 minutes and try again.",
-          };
-        case "invalid_username":
-          return {
-            success: false as const,
-            error: `Use a username of ${auth.MIN_USERNAME_LENGTH}–${auth.MAX_USERNAME_LENGTH} characters.`,
-          };
-        case "server_error":
-          return { success: false as const, error: "Could not save the username. Try again." };
-        case "invalid_credentials":
-          return { success: false as const, error: "Current password is incorrect." };
-      }
-    }
-
-    return { success: true as const };
   });

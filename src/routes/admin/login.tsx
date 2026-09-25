@@ -3,7 +3,6 @@ import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Factory, Globe, LoaderCircle, LockKeyhole, ShieldCheck } from "lucide-react";
-import { z } from "zod";
 
 import { loginFn } from "@/api/auth";
 import { BrandLogo } from "@/components/logo";
@@ -19,19 +18,7 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-const LoginSchema = z.object({
-  username: z.string().trim().min(1, "Enter your username."),
-  password: z.string().min(1, "Enter your password."),
-});
-
-type LoginValues = z.infer<typeof LoginSchema>;
-
-const genericLoginError = "Incorrect username or password.";
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
-}
+import { REQUEST_FAILED_MESSAGE, loginSchema, type LoginValues } from "@/lib/auth-contract";
 
 const brandPoints = [
   { icon: Factory, text: "Manage products, projects, insights and services from one place." },
@@ -53,7 +40,7 @@ function LoginPage() {
   const router = useRouter();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const form = useForm<LoginValues>({
-    resolver: zodResolver(LoginSchema),
+    resolver: zodResolver(loginSchema),
     defaultValues: { username: "", password: "" },
   });
   const formError = form.formState.errors.root?.["server"];
@@ -63,32 +50,17 @@ function LoginPage() {
     form.clearErrors("root.server");
 
     try {
-      const result: unknown = await loginFn({ data: values });
-      if (isRecord(result) && (result["success"] === false || result["ok"] === false)) {
-        const rateLimited = /rate|429|too many/i.test(
-          String(result["reason"] ?? result["error"] ?? result["message"] ?? ""),
-        );
-        form.setError("root.server", {
-          type: "server",
-          message: rateLimited
-            ? "Too many sign-in attempts. Please wait 15 minutes and try again."
-            : genericLoginError,
-        });
+      const result = await loginFn({ data: values });
+
+      if (!result.ok) {
+        form.setError("root.server", { type: "server", message: result.message });
         return;
       }
 
       await router.invalidate();
       await router.navigate({ to: "/admin/dashboard" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      form.setError("root.server", {
-        type: "server",
-        message: /redirect/i.test(message)
-          ? "Redirecting…"
-          : /rate|429|too many/i.test(message)
-            ? "Too many sign-in attempts. Please wait 15 minutes and try again."
-            : genericLoginError,
-      });
+    } catch {
+      form.setError("root.server", { type: "server", message: REQUEST_FAILED_MESSAGE });
     } finally {
       setIsSubmitting(false);
     }

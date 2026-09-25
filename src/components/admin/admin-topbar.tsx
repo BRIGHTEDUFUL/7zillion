@@ -41,10 +41,7 @@ export function AdminTopBar({ username, onOpenNavigation }: AdminTopBarProps) {
       await logoutFn();
       await router.invalidate();
       await router.navigate({ to: "/admin/login" });
-    } catch (error) {
-      if (error instanceof Error && /redirect/i.test(error.message)) {
-        return;
-      }
+    } catch {
       toast.error("Sign out failed. Please try again.");
       setIsLoggingOut(false);
     }

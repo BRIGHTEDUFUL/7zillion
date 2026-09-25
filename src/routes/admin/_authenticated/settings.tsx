@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useRouter } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { KeyRound, LoaderCircle, ShieldCheck, UserRound } from "lucide-react";
-import { z } from "zod";
 
 import { changePasswordFn, changeUsernameFn } from "@/api/auth";
 import { PageHeader } from "@/components/admin/page-header";
@@ -19,32 +18,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-
-const SettingsSchema = z
-  .object({
-    currentPassword: z.string().min(1, "Enter your current password."),
-    newPassword: z.string().min(8, "Use at least 8 characters."),
-    confirmPassword: z.string().min(1, "Confirm your new password."),
-  })
-  .refine((values) => values.newPassword === values.confirmPassword, {
-    message: "Passwords do not match.",
-    path: ["confirmPassword"],
-  });
-
-type SettingsValues = z.infer<typeof SettingsSchema>;
-
-// Mirrors MIN_USERNAME_LENGTH / MAX_USERNAME_LENGTH in src/lib/auth.ts — that
-// module is server-only, so the client schema restates the bounds.
-const UsernameSchema = z.object({
-  username: z
-    .string()
-    .trim()
-    .min(3, "Use at least 3 characters.")
-    .max(64, "Use at most 64 characters."),
-  currentPassword: z.string().min(1, "Enter your current password."),
-});
-
-type UsernameValues = z.infer<typeof UsernameSchema>;
+import {
+  REQUEST_FAILED_MESSAGE,
+  changePasswordSchema,
+  changeUsernameSchema,
+  type ChangePasswordValues,
+  type ChangeUsernameValues,
+} from "@/lib/auth-contract";
 
 export const Route = createFileRoute("/admin/_authenticated/settings")({
   head: () => ({
@@ -57,77 +37,72 @@ export const Route = createFileRoute("/admin/_authenticated/settings")({
 });
 
 function SettingsPage() {
+  const router = useRouter();
   const { username: currentUsername } = Route.useRouteContext();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [saved, setSaved] = useState(false);
   const [isSavingUsername, setIsSavingUsername] = useState(false);
   const [usernameSaved, setUsernameSaved] = useState(false);
-  const form = useForm<SettingsValues>({
-    resolver: zodResolver(SettingsSchema),
+  const form = useForm<ChangePasswordValues>({
+    resolver: zodResolver(changePasswordSchema),
     defaultValues: { currentPassword: "", newPassword: "", confirmPassword: "" },
   });
   const formError = form.formState.errors.root?.["server"];
-  const usernameForm = useForm<UsernameValues>({
-    resolver: zodResolver(UsernameSchema),
+  const usernameForm = useForm<ChangeUsernameValues>({
+    resolver: zodResolver(changeUsernameSchema),
     defaultValues: { username: "", currentPassword: "" },
   });
   const usernameError = usernameForm.formState.errors.root?.["server"];
 
-  async function handleSubmit(values: SettingsValues) {
+  async function handleSubmit(values: ChangePasswordValues) {
     setIsSubmitting(true);
     setSaved(false);
     form.clearErrors("root.server");
 
     try {
-      const result: unknown = await changePasswordFn({ data: values });
-      if (isRecord(result) && result["success"] === false) {
-        form.setError("root.server", {
-          type: "server",
-          message: String(result["error"] ?? "Could not update the password."),
-        });
+      const result = await changePasswordFn({ data: values });
+
+      if (!result.ok) {
+        if (result.code === "session_expired") {
+          await router.navigate({ to: "/admin/login" });
+          return;
+        }
+        form.setError("root.server", { type: "server", message: result.message });
         return;
       }
 
       setSaved(true);
       form.reset({ currentPassword: "", newPassword: "", confirmPassword: "" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      form.setError("root.server", {
-        type: "server",
-        message: /redirect/i.test(message)
-          ? "Your session has expired. Please sign in again."
-          : "Could not update the password. Try again.",
-      });
+    } catch {
+      form.setError("root.server", { type: "server", message: REQUEST_FAILED_MESSAGE });
     } finally {
       setIsSubmitting(false);
     }
   }
 
-  async function handleUsernameSubmit(values: UsernameValues) {
+  async function handleUsernameSubmit(values: ChangeUsernameValues) {
     setIsSavingUsername(true);
     setUsernameSaved(false);
     usernameForm.clearErrors("root.server");
 
     try {
-      const result: unknown = await changeUsernameFn({ data: values });
-      if (isRecord(result) && result["success"] === false) {
-        usernameForm.setError("root.server", {
-          type: "server",
-          message: String(result["error"] ?? "Could not update the username."),
-        });
+      const result = await changeUsernameFn({ data: values });
+
+      if (!result.ok) {
+        if (result.code === "session_expired") {
+          await router.navigate({ to: "/admin/login" });
+          return;
+        }
+        usernameForm.setError("root.server", { type: "server", message: result.message });
         return;
       }
 
       setUsernameSaved(true);
       usernameForm.reset({ username: "", currentPassword: "" });
-    } catch (error) {
-      const message = error instanceof Error ? error.message : "";
-      usernameForm.setError("root.server", {
-        type: "server",
-        message: /redirect/i.test(message)
-          ? "Your session has expired. Please sign in again."
-          : "Could not update the username. Try again.",
-      });
+      // Refresh the route context so the header and card show the new name.
+      await router.invalidate();
+    } catch {
+      usernameForm.setError("root.server", { type: "server", message: REQUEST_FAILED_MESSAGE });
     } finally {
       setIsSavingUsername(false);
     }
@@ -330,8 +305,4 @@ function SettingsPage() {
       </div>
     </div>
   );
-}
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return typeof value === "object" && value !== null;
 }
