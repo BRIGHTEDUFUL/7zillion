@@ -54,7 +54,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Water, juice, carbonated and can lines at 2,000–36,000 containers per hour — treatment, filling, labeling, packing and palletizing.",
+          "Water, juice, carbonated and can lines — treatment, filling, labeling, packing and palletizing.",
       },
       { property: "og:title", content: "Seven Zillions | Beverage Filling & Packaging Solutions" },
       {
@@ -238,7 +238,6 @@ function HomePage() {
         </div>
 
         <div className="shell hero-content">
-          <p className="hero-eyebrow">2,000–36,000 containers per hour</p>
           <h1>
             Complete Beverage Filling <br />
             Line Solutions
