@@ -18,6 +18,7 @@ vi.mock("@tanstack/react-start/server-only", () => ({}));
 
 import {
   checkRateLimit,
+  recordFailedAttempt,
   validateSession,
   login,
   changePassword,
@@ -89,6 +90,16 @@ function installConvexMock(): ConvexMock {
         sessions.delete(String(args["token"]));
         return null;
       case "auth:checkAndIncrementRateLimit":
+        return checkAndIncrementRateLimit(String(args["key"]));
+      case "auth:getRateLimit": {
+        const key = String(args["key"]);
+        const row = rateLimits.get(key);
+        if (!row || row.windowExpiresAt < new Date(Date.now()).toISOString()) {
+          return { count: 0 };
+        }
+        return { count: row.count };
+      }
+      case "auth:incrementRateLimit":
         return checkAndIncrementRateLimit(String(args["key"]));
       case "auth:getAdminCredentials":
         return state.credentials;
@@ -163,26 +174,37 @@ function seedSession(token: string, username: string, expiresAt: Date): void {
 // ──────────────────────────────────────────────────────────────────────────────
 
 describe("checkRateLimit", () => {
-  it("allows the first 10 requests from the same IP", async () => {
+  it("does not spend the budget just by asking", async () => {
     const env = makeEnv();
     const ip = "1.2.3.4";
 
-    for (let i = 1; i <= RATE_LIMIT_MAX_REQUESTS; i++) {
+    // Peeking is read-only: any number of checks must leave the counter alone.
+    for (let i = 1; i <= RATE_LIMIT_MAX_REQUESTS * 3; i++) {
       const allowed = await checkRateLimit(ip, env);
-      expect(allowed, `request ${i} should be allowed`).toBe(true);
+      expect(allowed, `peek ${i} should still be allowed`).toBe(true);
     }
   });
 
-  it("blocks the 11th request from the same IP", async () => {
+  it("allows exactly the first 10 failed attempts", async () => {
     const env = makeEnv();
     const ip = "5.6.7.8";
 
+    for (let i = 1; i <= RATE_LIMIT_MAX_REQUESTS; i++) {
+      expect(await recordFailedAttempt(ip, env), `attempt ${i} should be allowed`).toBe(true);
+    }
+    expect(await checkRateLimit(ip, env)).toBe(false);
+  });
+
+  it("blocks the 11th attempt from the same IP", async () => {
+    const env = makeEnv();
+    const ip = "5.6.7.9";
+
     for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
-      await checkRateLimit(ip, env);
+      await recordFailedAttempt(ip, env);
     }
 
-    const allowed = await checkRateLimit(ip, env);
-    expect(allowed).toBe(false);
+    expect(await checkRateLimit(ip, env)).toBe(false);
+    expect(await recordFailedAttempt(ip, env)).toBe(false);
   });
 
   it("treats different IPs as independent buckets", async () => {
@@ -190,7 +212,7 @@ describe("checkRateLimit", () => {
 
     // Exhaust IP A
     for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
-      await checkRateLimit("ip-A", env);
+      await recordFailedAttempt("ip-A", env);
     }
     expect(await checkRateLimit("ip-A", env)).toBe(false);
 
@@ -207,7 +229,7 @@ describe("checkRateLimit", () => {
 
     // Exhaust the current window
     for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
-      await checkRateLimit(ip, env);
+      await recordFailedAttempt(ip, env);
     }
     expect(await checkRateLimit(ip, env)).toBe(false);
 
@@ -328,6 +350,19 @@ describe("login error messages", () => {
     }
   });
 
+  it("never spends the budget on successful sign-ins", async () => {
+    const env = makeEnv();
+    const ip = "99.0.0.2";
+
+    // Many more than the limit, all correct — none of them may count
+    for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS * 3; i++) {
+      const result = await login("admin", "correct-password", ip, env);
+      expect(result.success).toBe(true);
+    }
+
+    expect(await checkRateLimit(ip, env)).toBe(true);
+  });
+
   it("never returns a field-specific error reason for any credential combination", async () => {
     const env = makeEnv();
     const badCombos = [
@@ -394,7 +429,7 @@ describe("changePassword", () => {
     const ip = "2.2.2.4";
 
     for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
-      await checkRateLimit(ip, env);
+      await recordFailedAttempt(ip, env);
     }
 
     const result = await changePassword("correct-password", "brand-new-password", ip, env);
@@ -402,6 +437,23 @@ describe("changePassword", () => {
     if (!result.success) {
       expect(result.reason).toBe("rate_limited");
     }
+  });
+
+  it("never spends the budget on a successful password change", async () => {
+    const env = makeEnv();
+    const ip = "2.2.2.7";
+
+    // Each rotation becomes the current password for the next one
+    let current = "correct-password";
+    for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS * 2; i++) {
+      const next = `rotated-password-${i}`;
+      const result = await changePassword(current, next, ip, env);
+      expect(result.success, `rotation ${i} should succeed`).toBe(true);
+      current = next;
+    }
+
+    // Still allowed: nothing above was a failed credential check
+    expect(await checkRateLimit(ip, env)).toBe(true);
   });
 
   it("makes the panel-set password override the env bootstrap credentials", async () => {
@@ -482,7 +534,7 @@ describe("changeUsername", () => {
     const ip = "3.3.3.6";
 
     for (let i = 0; i < RATE_LIMIT_MAX_REQUESTS; i++) {
-      await checkRateLimit(ip, env);
+      await recordFailedAttempt(ip, env);
     }
 
     const result = await changeUsername("operations", "correct-password", ip, env);

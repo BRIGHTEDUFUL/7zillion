@@ -159,8 +159,11 @@ async function effectiveCredentials(env: Env): Promise<EffectiveCredentials> {
 
 /**
  * Authenticate one administrator login attempt.
- * Rate-limit check happens before bcrypt so an attacker cannot use expensive
- * comparisons to bypass the per-IP limit.
+ *
+ * The per-IP limit is peeked before any bcrypt work, so a blocked IP never
+ * gets to spend expensive comparisons — but only a *failed* attempt is
+ * counted (`recordFailedAttempt`), which keeps a run of successful sign-ins
+ * from ever locking the real admin out of the panel.
  */
 export async function login(
   username: string,
@@ -191,6 +194,7 @@ export async function login(
   const usernameMatches = typeof username === "string" && username === creds.username;
 
   if (!usernameMatches || !passwordMatches) {
+    await recordFailedAttempt(ip, env);
     return { success: false, reason: "invalid_credentials" };
   }
 
@@ -245,6 +249,7 @@ export async function changePassword(
     }
   }
   if (!currentMatches) {
+    await recordFailedAttempt(ip, env);
     return { success: false, reason: "invalid_credentials" };
   }
 
@@ -301,6 +306,7 @@ export async function changeUsername(
     }
   }
   if (!currentMatches) {
+    await recordFailedAttempt(ip, env);
     return { success: false, reason: "invalid_credentials" };
   }
 
@@ -376,23 +382,50 @@ export async function validateSession(
 // ──────────────────────────────────────────────────────────────────────────────
 
 /**
- * Count one attempt for an IP in the current 15-minute window.
- * Returns true when the attempt is allowed, false when blocked.
+ * Is this IP currently allowed to attempt a sign-in?
+ *
+ * Read-only: peeking never spends the budget, so legitimate use (successful
+ * logins, password/username updates) cannot lock the admin out. Failures are
+ * counted separately by `recordFailedAttempt`.
+ *
+ * Fails open on a Convex outage so an outage never locks the admin out.
  */
 export async function checkRateLimit(ip: string, _env: Env): Promise<boolean> {
   const window = Math.floor(Date.now() / RATE_LIMIT_WINDOW_MS);
   const key = rateLimitKey(ip, window);
 
   try {
-    const result = (await convexInternalMutation("auth:checkAndIncrementRateLimit", { key })) as {
-      allowed: boolean;
+    const result = (await convexInternalQuery("auth:getRateLimit", { key })) as {
       count: number;
     };
-    return result.allowed;
+    return result.count < RATE_LIMIT_MAX_REQUESTS;
   } catch (error) {
     // On error, fail open (allow) so a Convex outage doesn't lock out the admin.
-    // Note: this is a known trade-off — a Convex outage bypasses rate limiting.
+    // Note: this is a known trade-off - a Convex outage bypasses rate limiting.
     console.error("checkRateLimit:", error);
+    return true;
+  }
+}
+
+/**
+ * Count one failed credential attempt for this IP in the current window.
+ *
+ * Called only after the credentials were rejected, which is what makes the
+ * limit a brake on brute force instead of a brake on the real admin. Errors
+ * are swallowed: a counting failure must not turn "wrong password" into a
+ * server error.
+ */
+export async function recordFailedAttempt(ip: string, _env: Env): Promise<boolean> {
+  const window = Math.floor(Date.now() / RATE_LIMIT_WINDOW_MS);
+  const key = rateLimitKey(ip, window);
+
+  try {
+    const result = (await convexInternalMutation("auth:incrementRateLimit", { key })) as {
+      count: number;
+    };
+    return result.count <= RATE_LIMIT_MAX_REQUESTS;
+  } catch (error) {
+    console.error("recordFailedAttempt:", error);
     return true;
   }
 }
