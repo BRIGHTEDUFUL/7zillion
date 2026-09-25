@@ -20,7 +20,8 @@ export function PageHeader({ title, description, eyebrow, actions, className }: 
     >
       <div className="max-w-3xl">
         {eyebrow ? (
-          <p className="mb-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+          <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.16em] text-primary">
+            <span className="inline-block size-2 rounded-[2px] bg-primary" aria-hidden="true" />
             {eyebrow}
           </p>
         ) : null}

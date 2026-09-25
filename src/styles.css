@@ -2762,3 +2762,46 @@ html.is-ready .inner-intro {
     padding: 22px;
   }
 }
+
+/* ── Admin panel branding ─────────────────────────────────────────────────
+   Scoped helpers for the admin workspace: the split-screen login, the
+   sidebar logo and the workspace background wash. These rules are
+   deliberately unlayered with two classes of specificity so they beat the
+   base `.brand-logo` rule (Tailwind's layered utilities lose to unlayered
+   CSS on ties). */
+
+.admin-login .brand-logo {
+  height: 46px;
+  filter: brightness(0) invert(1); /* white knockout on the violet panel */
+}
+
+.admin-login .admin-login-logo-mobile {
+  height: 32px;
+}
+
+.brand-logo--light {
+  filter: brightness(0) invert(1);
+}
+
+.admin-sidebar .brand-logo {
+  height: 34px;
+  filter: brightness(0) invert(1);
+}
+
+/* Faint technical grid over the login brand panel, faded toward the middle. */
+.admin-login-pattern {
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+  background-size: 44px 44px;
+  -webkit-mask-image: radial-gradient(ellipse at 30% 0%, #000 0%, transparent 75%);
+  mask-image: radial-gradient(ellipse at 30% 0%, #000 0%, transparent 75%);
+}
+
+/* Soft violet wash behind the whole admin workspace. */
+.admin-workspace {
+  background-color: hsl(280 44% 98%);
+  background-image:
+    radial-gradient(1000px 460px at 14% -10%, hsl(280 76% 50% / 0.1), transparent 65%),
+    radial-gradient(860px 420px at 106% 108%, hsl(250 84% 60% / 0.1), transparent 65%);
+}

@@ -20,7 +20,7 @@ export function AdminShell({ username }: AdminShellProps) {
   const [navigationOpen, setNavigationOpen] = useState(false);
 
   return (
-    <div className="min-h-svh bg-muted/35">
+    <div className="admin-workspace min-h-svh">
       <a
         href="#admin-content"
         className="fixed left-3 top-3 z-[100] -translate-y-20 rounded-md bg-background px-4 py-2 text-sm font-medium shadow-lg transition-transform focus:translate-y-0"

@@ -1,5 +1,5 @@
 import { useMemo, useState, type ReactNode } from "react";
-import { ArrowDown, ArrowUp, ArrowUpDown, Pencil, Trash2 } from "lucide-react";
+import { ArrowDown, ArrowUp, ArrowUpDown, Inbox, Pencil, Trash2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -100,8 +100,11 @@ export function ContentList<TItem>({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed bg-card px-6 py-14 text-center">
-        <p className="font-medium text-foreground">{emptyMessage}</p>
+      <div className="rounded-xl border border-dashed bg-card px-6 py-16 text-center">
+        <span className="mx-auto grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
+          <Inbox className="size-6" aria-hidden="true" />
+        </span>
+        <p className="mt-4 font-medium text-foreground">{emptyMessage}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Use the add action to create the first item.
         </p>
@@ -113,7 +116,7 @@ export function ContentList<TItem>({
     <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
       <Table>
         {caption ? <caption className="sr-only">{caption}</caption> : null}
-        <TableHeader>
+        <TableHeader className="[&_tr]:bg-muted/60">
           <TableRow>
             {columns.map((column) => {
               const isSorted = sort?.key === column.key;
