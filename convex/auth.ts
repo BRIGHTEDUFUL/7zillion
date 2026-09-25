@@ -13,9 +13,7 @@
 import { v } from "convex/values";
 import { internalMutation, internalQuery } from "./_generated/server";
 
-const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours
-const RATE_LIMIT_WINDOW_MS = 15 * 60 * 1000; // 15 minutes
-const RATE_LIMIT_MAX = 10;
+const SESSION_TTL_MS = 8 * 60 * 60 * 1000; // 8 hours — must match SESSION_TTL_SECONDS in src/lib/auth-contract.ts
 
 // ── Sessions ──────────────────────────────────────────────────────────────────
 
@@ -76,94 +74,5 @@ export const clearAdminCredentials = internalMutation({
   handler: async (ctx) => {
     const existing = await ctx.db.query("adminCredentials").first();
     if (existing) await ctx.db.delete(existing._id);
-  },
-});
-
-// ── Rate limits ───────────────────────────────────────────────────────────────
-
-/**
- * Read-only: attempts made by this key in the current window.
- *
- * The server peeks before doing any bcrypt work, then counts the attempt
- * separately — see `incrementRateLimit`.
- */
-export const getRateLimit = internalQuery({
-  args: { key: v.string() },
-  handler: async (ctx, { key }) => {
-    const row = await ctx.db
-      .query("rateLimits")
-      .withIndex("by_key", (q) => q.eq("key", key))
-      .first();
-
-    if (!row || row.windowExpiresAt < new Date(Date.now()).toISOString()) {
-      return { count: 0 };
-    }
-    return { count: row.count };
-  },
-});
-
-/** Count one *failed* attempt for this key, rolling the window when needed. */
-export const incrementRateLimit = internalMutation({
-  args: { key: v.string() },
-  handler: async (ctx, { key }) => {
-    const now = Date.now();
-    const windowExpiresAt = new Date(
-      Math.ceil(now / RATE_LIMIT_WINDOW_MS) * RATE_LIMIT_WINDOW_MS,
-    ).toISOString();
-
-    const existing = await ctx.db
-      .query("rateLimits")
-      .withIndex("by_key", (q) => q.eq("key", key))
-      .first();
-
-    if (!existing) {
-      await ctx.db.insert("rateLimits", { key, count: 1, windowExpiresAt });
-      return { count: 1 };
-    }
-
-    if (existing.windowExpiresAt < new Date(now).toISOString()) {
-      await ctx.db.patch(existing._id, { count: 1, windowExpiresAt });
-      return { count: 1 };
-    }
-
-    const next = existing.count + 1;
-    await ctx.db.patch(existing._id, { count: next });
-    return { count: next };
-  },
-});
-
-/**
- * @deprecated Counts every request, so a *successful* login also spent the
- * per-IP budget. Kept only so a server build deployed before the split
- * (peek + count-failures) keeps working against these functions; the current
- * app no longer calls it and it can be deleted once every server is redeployed.
- */
-export const checkAndIncrementRateLimit = internalMutation({
-  args: { key: v.string() },
-  handler: async (ctx, { key }) => {
-    const now = Date.now();
-    const windowExpiresAt = new Date(
-      Math.ceil(now / RATE_LIMIT_WINDOW_MS) * RATE_LIMIT_WINDOW_MS,
-    ).toISOString();
-
-    const existing = await ctx.db
-      .query("rateLimits")
-      .withIndex("by_key", (q) => q.eq("key", key))
-      .first();
-
-    if (!existing) {
-      await ctx.db.insert("rateLimits", { key, count: 1, windowExpiresAt });
-      return { allowed: true, count: 1 };
-    }
-
-    // If the stored window has expired, reset it
-    if (existing.windowExpiresAt < new Date(now).toISOString()) {
-      await ctx.db.patch(existing._id, { count: 1, windowExpiresAt });
-      return { allowed: true, count: 1 };
-    }
-
-    const next = existing.count + 1;
-    await ctx.db.patch(existing._id, { count: next });
-    return { allowed: next <= RATE_LIMIT_MAX, count: next };
   },
 });

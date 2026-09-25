@@ -82,8 +82,9 @@ Notes:
 - Hostinger provisions SSL for Node.js apps automatically; if HTTPS is not
   active, enable the free SSL certificate for the domain in hPanel →
   **Domains → SSL**.
-- HTTPS matters: the admin session cookie is `Secure`, so the login form only
-  works over HTTPS.
+- The admin session cookie is `Secure` whenever the request arrives over
+  HTTPS, so keep the SSL certificate enabled (see above). Plain-HTTP previews
+  (local or LAN) still work — there the cookie is issued without `Secure`.
 
 ---
 

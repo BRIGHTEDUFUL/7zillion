@@ -70,7 +70,10 @@ export default defineSchema({
     expiresAt: v.string(), // ISO timestamp (createdAt + 8h)
   }).index("by_token", ["token"]),
 
-  // ── Auth: rate limits (replaces KV rl:{ip}:{window}) ─────────────────────
+  // ── Auth: rate limits (legacy) ─────────────────────────────────────────
+  // Rate limiting now lives in-process in the Node server (src/lib/auth.ts).
+  // The table is kept only so existing rows stay schema-valid; nothing
+  // writes to it anymore.
   rateLimits: defineTable({
     key: v.string(), // "rl:{ip}:{window}"
     count: v.number(),
