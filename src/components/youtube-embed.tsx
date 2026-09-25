@@ -9,6 +9,7 @@ import { extractVideoId, toEmbedUrl, toThumbnailUrl } from "@/lib/youtube";
  *
  * Accepts:
  *   https://www.youtube.com/watch?v=VIDEO_ID
+ *   https://youtube.com/shorts/VIDEO_ID   (share links with ?query are fine)
  *   https://youtu.be/VIDEO_ID
  *   https://www.youtube.com/embed/VIDEO_ID  (already an embed URL)
  *

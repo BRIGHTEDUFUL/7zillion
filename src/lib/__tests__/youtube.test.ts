@@ -28,10 +28,32 @@ describe("YouTube URL helpers", () => {
     );
   });
 
+  it("accepts YouTube Shorts URLs, with or without share params", () => {
+    expect(extractVideoId("https://youtube.com/shorts/7-6u5twSCsE")).toBe("7-6u5twSCsE");
+    expect(extractVideoId("https://www.youtube.com/shorts/tLB3E8gM9UE?feature=share")).toBe(
+      "tLB3E8gM9UE",
+    );
+    expect(toEmbedUrl("https://youtube.com/shorts/7-6u5twSCsE")).toBe(
+      "https://www.youtube.com/embed/7-6u5twSCsE",
+    );
+  });
+
+  it("accepts live URLs and the no-cookie embed host", () => {
+    expect(extractVideoId("https://www.youtube.com/live/abc123XYZ_-")).toBe("abc123XYZ_-");
+    expect(extractVideoId("https://www.youtube-nocookie.com/embed/abc123XYZ_-")).toBe(
+      "abc123XYZ_-",
+    );
+  });
+
+  it("tolerates a scheme-less paste", () => {
+    expect(extractVideoId("youtu.be/dQw4w9WgXcQ")).toBe("dQw4w9WgXcQ");
+  });
+
   it("rejects a missing or malformed URL instead of throwing", () => {
     expect(toEmbedUrl("")).toBeNull();
     expect(toEmbedUrl("not a url")).toBeNull();
     expect(toEmbedUrl("https://example.com/watch?v=dQw4w9WgXcQ")).toBeNull();
+    expect(toEmbedUrl("https://example.com/embed/dQw4w9WgXcQ")).toBeNull();
     expect(toEmbedUrl("https://www.youtube.com/playlist?list=PL123")).toBeNull();
     expect(toEmbedUrl("https://www.youtube.com/embed/")).toBeNull();
   });

@@ -20,28 +20,34 @@ export function extractVideoId(url: string): string | null {
   try {
     parsed = new URL(url);
   } catch {
-    return null;
+    // Tolerate scheme-less pastes like "youtu.be/abc" (the admin form's zod
+    // validation rejects those, but rendering old rows should not break).
+    try {
+      parsed = new URL(`https://${url}`);
+    } catch {
+      return null;
+    }
   }
 
-  // https://www.youtube.com/embed/VIDEO_ID
-  if (parsed.pathname.startsWith("/embed/")) {
-    const id = parsed.pathname.slice("/embed/".length);
-    return id || null;
+  const host = parsed.hostname.toLowerCase();
+
+  // https://youtu.be/VIDEO_ID (optionally with /extra/path or ?query)
+  if (host === "youtu.be") {
+    const id = parsed.pathname.split("/").filter(Boolean)[0];
+    return id ?? null;
   }
 
-  // https://youtu.be/VIDEO_ID
-  if (parsed.hostname === "youtu.be") {
-    const id = parsed.pathname.slice(1);
-    return id || null;
+  const isYouTube = /(^|\.)youtube\.com$/.test(host) || /(^|\.)youtube-nocookie\.com$/.test(host);
+  if (!isYouTube) return null;
+
+  // https://www.youtube.com/watch?v=VIDEO_ID (m./music. subdomains too)
+  if (parsed.pathname === "/watch") {
+    return parsed.searchParams.get("v") || null;
   }
 
-  // https://www.youtube.com/watch?v=VIDEO_ID (also m.youtube.com, music.youtube.com)
-  if (/(^|\.)youtube\.com$/.test(parsed.hostname) && parsed.pathname === "/watch") {
-    const id = parsed.searchParams.get("v");
-    return id || null;
-  }
-
-  return null;
+  // /embed/ID, /shorts/ID, /live/ID, /v/ID — first path segment after the key
+  const match = /^\/(embed|shorts|live|v)\/([^/?#]+)/.exec(parsed.pathname);
+  return match?.[2] ?? null;
 }
 
 /** Thumbnail served by YouTube for a video id (works without an API key). */
