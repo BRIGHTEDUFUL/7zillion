@@ -660,7 +660,7 @@ export const projects = [
   {
     date: "2023-12-11",
     title: "25 T/H Water Treatment System Commissioned in West Africa",
-    copy: "Seven Zillions designed and delivered a 25 T/H water treatment system and air-compressor package for a West African producer, achieving the required treated-water standard.",
+    copy: "Seven Zillions designed, built and commissioned a 25 T/H water treatment system for a West African producer — filtration, carbon and softening ahead of reverse osmosis, with treated-water storage delivering the required treated-water standard.",
     image: projectFilterImage,
   },
 ];
