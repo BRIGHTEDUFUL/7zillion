@@ -22,19 +22,23 @@ function InsightsIndexPage() {
     {
       key: "title",
       header: "Title",
-      accessor: (insight) => <span className="font-medium">{insight.title}</span>,
+      accessor: (insight) => <span className="font-semibold text-foreground">{insight.title}</span>,
       sortValue: (insight) => insight.title,
     },
     {
       key: "num",
       header: "Number",
-      accessor: (insight) => insight.num || "—",
+      accessor: (insight) => <span className="text-muted-foreground">{insight.num || "—"}</span>,
       sortValue: (insight) => insight.num,
     },
     {
       key: "slug",
       header: "Slug",
-      accessor: (insight) => <code className="text-xs text-muted-foreground">{insight.slug}</code>,
+      accessor: (insight) => (
+        <span className="inline-flex items-center rounded-md bg-muted/80 px-2.5 py-1 font-mono text-[11px] font-medium text-foreground/75 ring-1 ring-inset ring-border/60">
+          {insight.slug}
+        </span>
+      ),
       sortValue: (insight) => insight.slug,
     },
   ];
@@ -57,9 +61,9 @@ function InsightsIndexPage() {
         title="Insights"
         description={`${insights.length} ${insights.length === 1 ? "article" : "articles"} published.`}
         actions={
-          <Button asChild>
+          <Button asChild className="gap-2 shadow-sm">
             <Link to="/admin/insights/new">
-              <Plus aria-hidden="true" />
+              <Plus className="size-4" aria-hidden="true" />
               Add insight
             </Link>
           </Button>

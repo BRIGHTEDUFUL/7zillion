@@ -1,20 +1,28 @@
 import logoColor from "@/assets/brand/logo-color.png";
 
 /**
- * The single logo image used everywhere on the site.
+ * The brand logo component.
  *
- * There is deliberately only one asset: `logo-white.png` used to be a second
- * copy rendered alongside it and hidden with CSS, which meant both could show
- * at once if a selector lost the specificity battle. The white knockout is now
- * produced from this same file with `filter: brightness(0) invert(1)`, which
- * reproduces the old asset exactly (identical alpha shape, 1058x371).
+ * Supports rendering the full authentic color logo (`variant="color"`),
+ * the white knockout (`variant="white"`), or default context-aware mode (`variant="auto"`).
  */
-export function BrandLogo({ className = "" }: { className?: string }) {
+export function BrandLogo({
+  className = "",
+  variant = "auto",
+  alt = "Seven Zillions — Cooperation and Interdependence",
+}: {
+  className?: string;
+  variant?: "auto" | "color" | "white";
+  alt?: string;
+}) {
+  const variantClass =
+    variant === "color" ? "brand-logo--color" : variant === "white" ? "brand-logo--light" : "";
+
   return (
     <img
-      className={`brand-logo${className ? ` ${className}` : ""}`}
+      className={`brand-logo ${variantClass} ${className}`.trim()}
       src={logoColor}
-      alt="Seven Zillions — Cooperation and Interdependence"
+      alt={alt}
       decoding="async"
     />
   );

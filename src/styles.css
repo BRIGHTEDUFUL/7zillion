@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,300..800;1,300..800&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=JetBrains+Mono:wght@400;500;600&display=swap");
 @import "tailwindcss" source(none);
 @source "../src";
 @import "tw-animate-css";
@@ -20,7 +21,9 @@
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
-  --font-sans: "Arial", "Helvetica Neue", sans-serif;
+  --font-sans:
+    "Plus Jakarta Sans", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 :root {
@@ -2765,22 +2768,14 @@ html.is-ready .inner-intro {
 
 /* ── Admin panel branding ─────────────────────────────────────────────────
    Scoped helpers for the admin workspace: the split-screen login, the
-   sidebar logo and the workspace background wash. These rules are
-   deliberately unlayered with two classes of specificity so they beat the
-   base `.brand-logo` rule (Tailwind's layered utilities lose to unlayered
-   CSS on ties). */
+   sidebar logo and the workspace background wash. */
 
-.admin-login .brand-logo {
-  height: 46px;
-  filter: brightness(0) invert(1); /* white knockout on the violet panel */
-}
-
-.admin-login .admin-login-logo-mobile {
-  height: 32px;
+.brand-logo--color {
+  filter: none !important;
 }
 
 .brand-logo--light {
-  filter: brightness(0) invert(1);
+  filter: brightness(0) invert(1) !important;
 }
 
 .admin-sidebar .brand-logo {
@@ -2800,8 +2795,8 @@ html.is-ready .inner-intro {
 
 /* Soft violet wash behind the whole admin workspace. */
 .admin-workspace {
-  background-color: hsl(280 44% 98%);
+  background-color: hsl(280 44% 98.5%);
   background-image:
-    radial-gradient(1000px 460px at 14% -10%, hsl(280 76% 50% / 0.1), transparent 65%),
-    radial-gradient(860px 420px at 106% 108%, hsl(250 84% 60% / 0.1), transparent 65%);
+    radial-gradient(1000px 460px at 14% -10%, hsl(280 76% 50% / 0.06), transparent 65%),
+    radial-gradient(860px 420px at 106% 108%, hsl(250 84% 60% / 0.06), transparent 65%);
 }

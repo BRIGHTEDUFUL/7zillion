@@ -22,13 +22,17 @@ function ProjectsIndexPage() {
     {
       key: "title",
       header: "Title",
-      accessor: (project) => <span className="font-medium">{project.title}</span>,
+      accessor: (project) => <span className="font-semibold text-foreground">{project.title}</span>,
       sortValue: (project) => project.title,
     },
     {
       key: "date",
       header: "Date",
-      accessor: (project) => <time dateTime={project.date}>{project.date}</time>,
+      accessor: (project) => (
+        <span className="inline-flex items-center rounded-md bg-muted/80 px-2.5 py-1 font-mono text-[11px] font-medium text-foreground/75 ring-1 ring-inset ring-border/60">
+          <time dateTime={project.date}>{project.date}</time>
+        </span>
+      ),
       sortValue: (project) => project.date,
     },
   ];
@@ -51,9 +55,9 @@ function ProjectsIndexPage() {
         title="Projects"
         description={`${projects.length} ${projects.length === 1 ? "project" : "projects"} in the public portfolio.`}
         actions={
-          <Button asChild>
+          <Button asChild className="gap-2 shadow-sm">
             <Link to="/admin/projects/new">
-              <Plus aria-hidden="true" />
+              <Plus className="size-4" aria-hidden="true" />
               Add project
             </Link>
           </Button>

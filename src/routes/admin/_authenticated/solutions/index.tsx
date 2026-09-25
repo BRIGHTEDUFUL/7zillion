@@ -22,20 +22,26 @@ function SolutionsIndexPage() {
     {
       key: "name",
       header: "Name",
-      accessor: (solution) => <span className="font-medium">{solution.name}</span>,
+      accessor: (solution) => (
+        <span className="font-semibold text-foreground">{solution.name}</span>
+      ),
       sortValue: (solution) => solution.name,
     },
     {
       key: "eyebrow",
       header: "Eyebrow",
-      accessor: (solution) => solution.eyebrow || "—",
+      accessor: (solution) => (
+        <span className="text-muted-foreground">{solution.eyebrow || "—"}</span>
+      ),
       sortValue: (solution) => solution.eyebrow,
     },
     {
       key: "slug",
       header: "Slug",
       accessor: (solution) => (
-        <code className="text-xs text-muted-foreground">{solution.slug}</code>
+        <span className="inline-flex items-center rounded-md bg-muted/80 px-2.5 py-1 font-mono text-[11px] font-medium text-foreground/75 ring-1 ring-inset ring-border/60">
+          {solution.slug}
+        </span>
       ),
       sortValue: (solution) => solution.slug,
     },
@@ -59,9 +65,9 @@ function SolutionsIndexPage() {
         title="Solutions"
         description={`${solutions.length} ${solutions.length === 1 ? "solution" : "solutions"} available.`}
         actions={
-          <Button asChild>
+          <Button asChild className="gap-2 shadow-sm">
             <Link to="/admin/solutions/new">
-              <Plus aria-hidden="true" />
+              <Plus className="size-4" aria-hidden="true" />
               Add solution
             </Link>
           </Button>

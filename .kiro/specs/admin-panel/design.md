@@ -98,11 +98,11 @@ export interface ContentStore {
   queryActivity(opts: ActivityQueryOptions): Promise<ActivityLogEntry[]>;
 }
 
-export type CollectionName = 'products' | 'solutions' | 'packages' | 'insights';
+export type CollectionName = "products" | "solutions" | "packages" | "insights";
 
 export interface ActivityQueryOptions {
   limit?: number;
-  since?: Date;   // for 30-day metric aggregations
+  since?: Date; // for 30-day metric aggregations
   eventTypes?: EventType[];
 }
 ```
@@ -119,7 +119,10 @@ export async function login(
   password: string,
   ip: string,
   env: Env,
-): Promise<{ success: true; sessionToken: string } | { success: false; reason: 'invalid_credentials' | 'rate_limited' }>;
+): Promise<
+  | { success: true; sessionToken: string }
+  | { success: false; reason: "invalid_credentials" | "rate_limited" }
+>;
 
 export async function logout(sessionToken: string, env: Env): Promise<void>;
 
@@ -161,7 +164,7 @@ Example interface for products:
 // src/api/products.ts
 export const listProductsFn = createServerFn().handler(async ({ context }) => {
   const store = getContentStore(context.env);
-  return store.listItems<Product>('products');
+  return store.listItems<Product>("products");
 });
 
 export const upsertProductFn = createServerFn()
@@ -169,7 +172,7 @@ export const upsertProductFn = createServerFn()
   .handler(async ({ data, context }) => {
     await requireAuth(context);
     const store = getContentStore(context.env);
-    await store.putItem('products', data);
+    await store.putItem("products", data);
   });
 
 export const deleteProductFn = createServerFn()
@@ -177,7 +180,7 @@ export const deleteProductFn = createServerFn()
   .handler(async ({ data, context }) => {
     await requireAuth(context);
     const store = getContentStore(context.env);
-    await store.deleteItem('products', data.slug);
+    await store.deleteItem("products", data.slug);
   });
 ```
 
@@ -216,6 +219,7 @@ src/routes/admin/
 ```
 
 The `admin/__root.tsx` layout component:
+
 - Runs `validateSession` in its `beforeLoad` hook; redirects unauthenticated requests to `/admin/login`.
 - Renders the `AdminShell`: sidebar nav, top bar (username + logout), `<Outlet />`.
 - Does **not** render the public site `<SiteHeader>` or `<SiteFooter>`.
@@ -244,10 +248,10 @@ Each existing public route loader is updated to call the corresponding server fu
 
 ```ts
 // Before:
-import { products } from '@/data/site';
+import { products } from "@/data/site";
 
 // After:
-export const Route = createFileRoute('/products/')({
+export const Route = createFileRoute("/products/")({
   loader: () => listProductsFn(),
   component: ProductsPage,
 });
@@ -276,12 +280,12 @@ Public routes record events by calling `recordActivityFn` from their server-side
 // In the products/$slug loader:
 loader: async ({ params, context }) => {
   await recordActivityFn({
-    type: 'page_view',
+    type: "page_view",
     path: `/products/${params.slug}`,
     timestamp: new Date().toISOString(),
   });
   return getProductFn({ slug: params.slug });
-}
+};
 ```
 
 `recordActivityFn` is fire-and-forget with error swallowing (requirement 2.7): if the write fails, the function logs to `console.error` and returns normally so the page render is not affected.
@@ -405,8 +409,8 @@ export type Package = {
 };
 
 export type Project = {
-  id: string;          // server-generated UUID
-  date: string;        // ISO 8601 YYYY-MM-DD
+  id: string; // server-generated UUID
+  date: string; // ISO 8601 YYYY-MM-DD
   title: string;
   copy: string;
   image: string;
@@ -426,17 +430,14 @@ export type Service = {
 };
 
 export type EventType =
-  | 'page_view'
-  | 'whatsapp_click'
-  | 'contact_submission'
-  | 'enquiry_submission';
+  "page_view" | "whatsapp_click" | "contact_submission" | "enquiry_submission";
 
 export type ActivityLogEntry = {
   id: number;
   eventType: EventType;
   path?: string;
   slug?: string;
-  timestamp: string;  // ISO 8601 UTC
+  timestamp: string; // ISO 8601 UTC
 };
 ```
 
@@ -458,7 +459,10 @@ export const CompanySchema = z.object({
 });
 
 export const ProductSchema = z.object({
-  slug: z.string().min(1).regex(/^[a-z0-9-]+$/),
+  slug: z
+    .string()
+    .min(1)
+    .regex(/^[a-z0-9-]+$/),
   name: z.string().min(1),
   category: z.string().min(1),
   image: z.string(),
@@ -475,7 +479,7 @@ export const ProductSchema = z.object({
 export const DateStringSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/);
 
 export const ProjectSchema = z.object({
-  id: z.string().optional(),   // omitted on create; server assigns
+  id: z.string().optional(), // omitted on create; server assigns
   date: DateStringSchema,
   title: z.string().min(1),
   copy: z.string().min(1),
@@ -487,11 +491,11 @@ export const ProjectSchema = z.object({
 
 ## Correctness Properties
 
-*A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees.*
+_A property is a characteristic or behavior that should hold true across all valid executions of a system — essentially, a formal statement about what the system should do. Properties serve as the bridge between human-readable specifications and machine-verifiable correctness guarantees._
 
 ### Property 1: Unauthenticated requests to any admin route are redirected
 
-*For any* path that begins with `/admin` (excluding `/admin/login` itself), a request carrying no session cookie or an invalid session token SHALL receive a redirect response to `/admin/login` — regardless of which specific admin route is targeted.
+_For any_ path that begins with `/admin` (excluding `/admin/login` itself), a request carrying no session cookie or an invalid session token SHALL receive a redirect response to `/admin/login` — regardless of which specific admin route is targeted.
 
 **Validates: Requirements 1.1, 1.6**
 
@@ -499,7 +503,7 @@ export const ProjectSchema = z.object({
 
 ### Property 2: Invalid credentials never reveal which field is wrong
 
-*For any* (username, password) pair that does not exactly match the stored admin credentials, the Auth_Service response SHALL not contain the strings `"username"`, `"password"`, or any phrase indicating which specific field failed. The same generic error message SHALL be returned whether the username is wrong, the password is wrong, or both are wrong.
+_For any_ (username, password) pair that does not exactly match the stored admin credentials, the Auth_Service response SHALL not contain the strings `"username"`, `"password"`, or any phrase indicating which specific field failed. The same generic error message SHALL be returned whether the username is wrong, the password is wrong, or both are wrong.
 
 **Validates: Requirements 1.3**
 
@@ -507,7 +511,7 @@ export const ProjectSchema = z.object({
 
 ### Property 3: Content round-trip — write then read returns identical data
 
-*For any* valid content item (Product, Solution, Package, Insight, Service item, or Company_Info), submitting that item through the corresponding server function SHALL result in the Content_Store returning an identical value on the next read of that item. No field may be silently dropped, truncated, or transformed.
+_For any_ valid content item (Product, Solution, Package, Insight, Service item, or Company_Info), submitting that item through the corresponding server function SHALL result in the Content_Store returning an identical value on the next read of that item. No field may be silently dropped, truncated, or transformed.
 
 **Validates: Requirements 3.2, 4.3, 4.5, 5.3, 5.5, 6.3, 6.5, 7.3, 7.5, 8.3, 8.5, 9.2**
 
@@ -515,7 +519,7 @@ export const ProjectSchema = z.object({
 
 ### Property 4: Slug uniqueness is enforced across each collection independently
 
-*For any* collection (products, solutions, packages, insights), if a slug `S` already exists in that collection, attempting to add a different item with the same slug `S` SHALL be rejected with a duplicate-slug error. The rejection SHALL apply regardless of the other fields of the new item.
+_For any_ collection (products, solutions, packages, insights), if a slug `S` already exists in that collection, attempting to add a different item with the same slug `S` SHALL be rejected with a duplicate-slug error. The rejection SHALL apply regardless of the other fields of the new item.
 
 **Validates: Requirements 4.8, 5.8, 6.8, 8.8**
 
@@ -523,7 +527,8 @@ export const ProjectSchema = z.object({
 
 ### Property 5: Required-field validation rejects any form with a blank required field
 
-*For any* content form, and for any assignment of values where at least one required field (as defined per content type) is empty or contains only whitespace, the form submission SHALL be rejected and a validation error SHALL be reported on each offending field. The set of required fields is:
+_For any_ content form, and for any assignment of values where at least one required field (as defined per content type) is empty or contains only whitespace, the form submission SHALL be rejected and a validation error SHALL be reported on each offending field. The set of required fields is:
+
 - Company: `name`, `email`, `whatsappHref`
 - Product: `slug`, `name`, `category`, `summary`
 - Solution: `slug`, `name`, `summary`
@@ -538,7 +543,7 @@ export const ProjectSchema = z.object({
 
 ### Property 6: Email field rejects all non-RFC-5322 strings
 
-*For any* string that is not a syntactically valid RFC 5322 email address, the `email` validator SHALL reject it and surface a field-level error. Valid email addresses SHALL pass the same validator without error.
+_For any_ string that is not a syntactically valid RFC 5322 email address, the `email` validator SHALL reject it and surface a field-level error. Valid email addresses SHALL pass the same validator without error.
 
 **Validates: Requirements 3.4**
 
@@ -546,7 +551,7 @@ export const ProjectSchema = z.object({
 
 ### Property 7: Activity log entries faithfully record their inputs
 
-*For any* event type and associated metadata (path, slug, timestamp), a call to `recordActivityFn` SHALL result in an `ActivityLogEntry` stored in the Content_Store whose `eventType`, `path`, `slug`, and `timestamp` fields exactly match the inputs provided.
+_For any_ event type and associated metadata (path, slug, timestamp), a call to `recordActivityFn` SHALL result in an `ActivityLogEntry` stored in the Content_Store whose `eventType`, `path`, `slug`, and `timestamp` fields exactly match the inputs provided.
 
 **Validates: Requirements 2.3, 2.4, 2.6**
 
@@ -554,7 +559,7 @@ export const ProjectSchema = z.object({
 
 ### Property 8: Dashboard "recent 10" shows the newest entries and no others
 
-*For any* activity log containing N entries (N ≥ 1), the dashboard list SHALL contain exactly `min(N, 10)` entries, and those entries SHALL be the `min(N, 10)` entries with the most recent timestamps. No entry with an older timestamp than the 10th-most-recent SHALL appear in the list.
+_For any_ activity log containing N entries (N ≥ 1), the dashboard list SHALL contain exactly `min(N, 10)` entries, and those entries SHALL be the `min(N, 10)` entries with the most recent timestamps. No entry with an older timestamp than the 10th-most-recent SHALL appear in the list.
 
 **Validates: Requirements 2.2**
 
@@ -562,7 +567,7 @@ export const ProjectSchema = z.object({
 
 ### Property 9: Image upload rejects any file outside the allowed type or size envelope
 
-*For any* file where MIME type ∉ {`image/jpeg`, `image/png`, `image/webp`} OR whose byte size > 5,242,880 (5 MB), the ImageUpload component SHALL reject the file before making any network request, and no upload to R2 SHALL occur.
+_For any_ file where MIME type ∉ {`image/jpeg`, `image/png`, `image/webp`} OR whose byte size > 5,242,880 (5 MB), the ImageUpload component SHALL reject the file before making any network request, and no upload to R2 SHALL occur.
 
 **Validates: Requirements 10.2, 10.4, 10.5**
 
@@ -570,7 +575,7 @@ export const ProjectSchema = z.object({
 
 ### Property 10: Public pages reflect Content_Store state on the very next request
 
-*For any* content type that is updated via the Content_API, the next server-rendered HTTP request to any public page that displays that content type SHALL return a response reflecting the updated state. No cached version of the previous state SHALL be served.
+_For any_ content type that is updated via the Content_API, the next server-rendered HTTP request to any public page that displays that content type SHALL return a response reflecting the updated state. No cached version of the previous state SHALL be served.
 
 **Validates: Requirements 3.5, 4.10**
 
@@ -578,7 +583,7 @@ export const ProjectSchema = z.object({
 
 ### Property 11: ISO 8601 date validation rejects all non-YYYY-MM-DD strings
 
-*For any* string that is not of the form `YYYY-MM-DD` (four-digit year, valid month 01–12, valid day 01–31), the date field validator SHALL reject it. Valid `YYYY-MM-DD` strings SHALL pass.
+_For any_ string that is not of the form `YYYY-MM-DD` (four-digit year, valid month 01–12, valid day 01–31), the date field validator SHALL reject it. Valid `YYYY-MM-DD` strings SHALL pass.
 
 **Validates: Requirements 7.8**
 
@@ -588,22 +593,22 @@ export const ProjectSchema = z.object({
 
 ### Authentication Errors
 
-| Scenario | Behaviour |
-|---|---|
-| Missing session cookie | Redirect to `/admin/login`; no 401 exposed to client |
-| Expired session token | KV TTL expiry causes lookup miss → same redirect |
-| Tampered session token | Lookup miss in KV → redirect |
-| Rate limit exceeded (>10 in 15 min) | HTTP 429 with `Retry-After` header; no error detail leaked |
-| Invalid credentials | Generic error: "Incorrect username or password"; no field hint |
+| Scenario                            | Behaviour                                                      |
+| ----------------------------------- | -------------------------------------------------------------- |
+| Missing session cookie              | Redirect to `/admin/login`; no 401 exposed to client           |
+| Expired session token               | KV TTL expiry causes lookup miss → same redirect               |
+| Tampered session token              | Lookup miss in KV → redirect                                   |
+| Rate limit exceeded (>10 in 15 min) | HTTP 429 with `Retry-After` header; no error detail leaked     |
+| Invalid credentials                 | Generic error: "Incorrect username or password"; no field hint |
 
 ### Content_API Errors
 
-| Scenario | Behaviour |
-|---|---|
-| Zod validation failure | Return `{ success: false, errors: ZodError.flatten() }` to client |
-| Duplicate slug | Return `{ success: false, errors: { slug: 'already in use' } }` |
-| D1 write failure | Log server-side; return HTTP 500 with generic message |
-| R2 upload URL generation failure | Return HTTP 500; client shows "Image upload unavailable" toast |
+| Scenario                         | Behaviour                                                         |
+| -------------------------------- | ----------------------------------------------------------------- |
+| Zod validation failure           | Return `{ success: false, errors: ZodError.flatten() }` to client |
+| Duplicate slug                   | Return `{ success: false, errors: { slug: 'already in use' } }`   |
+| D1 write failure                 | Log server-side; return HTTP 500 with generic message             |
+| R2 upload URL generation failure | Return HTTP 500; client shows "Image upload unavailable" toast    |
 
 ### Activity Log Errors (Requirement 2.7)
 
@@ -622,6 +627,7 @@ If a public-route loader cannot reach the Content_Store (D1 unavailable), TanSta
 Scope: pure logic — Zod validators, slug normalisation, date parsing, Auth_Service token operations, activity query filtering.
 
 Focus areas:
+
 - All Zod schemas: valid inputs pass, invalid inputs produce expected error shapes
 - `checkRateLimit`: boundary at 10 requests, reset after window
 - `validateSession`: valid token returns user, expired/missing token returns `{ valid: false }`
@@ -663,6 +669,7 @@ Manual or scripted against a local `wrangler dev` environment with a local D1/KV
 ### Smoke Tests
 
 Single-run checks against the deployed Worker:
+
 - `/admin` redirects to `/admin/login` (no session)
 - `/admin/login` returns 200
 - D1 binding is present (`wrangler d1 info`)

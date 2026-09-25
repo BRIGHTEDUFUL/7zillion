@@ -61,18 +61,26 @@ export function AdminSidebar({ onNavigate, className }: AdminSidebarProps) {
                 onClick={onNavigate}
                 aria-current={isActive ? "page" : undefined}
                 className={cn(
-                  "relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-white/72 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
-                  isActive && "bg-white text-primary shadow-sm hover:bg-white hover:text-primary",
+                  "group relative flex min-h-10 items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white",
+                  isActive
+                    ? "bg-white/15 text-white font-semibold shadow-inner ring-1 ring-white/20 backdrop-blur-xs"
+                    : "text-white/70 hover:bg-white/10 hover:text-white",
                 )}
               >
                 {isActive ? (
                   <span
                     aria-hidden="true"
-                    className="absolute inset-y-1.5 left-0 w-0.5 rounded-full bg-primary"
+                    className="absolute inset-y-1.5 left-0 w-1 rounded-r-full bg-violet-300 shadow-[0_0_8px_rgba(216,180,254,0.6)]"
                   />
                 ) : null}
-                <Icon className="size-4 shrink-0" aria-hidden="true" />
-                {item.label}
+                <Icon
+                  className={cn(
+                    "size-4 shrink-0 transition-colors",
+                    isActive ? "text-violet-200" : "text-white/60 group-hover:text-white",
+                  )}
+                  aria-hidden="true"
+                />
+                <span className="truncate">{item.label}</span>
               </Link>
             </li>
           );
@@ -84,17 +92,17 @@ export function AdminSidebar({ onNavigate, className }: AdminSidebarProps) {
   return (
     <div
       className={cn(
-        "admin-sidebar flex h-full flex-col bg-primary text-primary-foreground",
+        "admin-sidebar flex h-full flex-col bg-gradient-to-b from-[#320546] via-[#3C0654] to-[#240333] text-white shadow-xl",
         className,
       )}
     >
-      <div className="flex h-20 shrink-0 items-center border-b border-white/15 px-6">
+      <div className="flex h-20 shrink-0 items-center border-b border-white/10 px-6">
         <Link
           to="/admin/dashboard"
           onClick={onNavigate}
           className="flex flex-col gap-1.5 rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
-          <BrandLogo />
+          <BrandLogo variant="white" className="h-8 w-auto" />
           <span className="text-[10px] font-bold uppercase tracking-[0.24em] text-white/60">
             Admin workspace
           </span>
@@ -102,18 +110,18 @@ export function AdminSidebar({ onNavigate, className }: AdminSidebarProps) {
       </div>
 
       <nav className="flex-1 overflow-y-auto px-3 py-5" aria-label="Admin navigation">
-        <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
+        <p className="px-3 pb-2 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
           Workspace
         </p>
         {renderItems(workspaceNavigation)}
 
-        <p className="px-3 pb-2 pt-6 text-[10px] font-bold uppercase tracking-[0.18em] text-white/50">
+        <p className="px-3 pb-2 pt-6 text-[10px] font-bold uppercase tracking-[0.18em] text-white/45">
           Account
         </p>
         {renderItems(accountNavigation)}
       </nav>
 
-      <div className="shrink-0 border-t border-white/15 p-3">
+      <div className="shrink-0 border-t border-white/10 p-3">
         <a
           href="/"
           target="_blank"
@@ -121,9 +129,9 @@ export function AdminSidebar({ onNavigate, className }: AdminSidebarProps) {
           className="flex min-h-10 items-center justify-between rounded-lg px-3 py-2 text-sm font-medium text-white/75 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
         >
           View live site
-          <ExternalLink className="size-4" aria-hidden="true" />
+          <ExternalLink className="size-4 opacity-75" aria-hidden="true" />
         </a>
-        <p className="px-3 pt-2 pb-1 text-xs leading-5 text-white/55">
+        <p className="px-3 pt-2 pb-1 text-xs leading-5 text-white/50">
           Changes appear on the public site after save.
         </p>
       </div>

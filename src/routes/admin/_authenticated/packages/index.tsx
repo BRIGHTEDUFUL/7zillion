@@ -22,13 +22,17 @@ function PackagesIndexPage() {
     {
       key: "name",
       header: "Name",
-      accessor: (item) => <span className="font-medium">{item.name}</span>,
+      accessor: (item) => <span className="font-semibold text-foreground">{item.name}</span>,
       sortValue: (item) => item.name,
     },
     {
       key: "slug",
       header: "Slug",
-      accessor: (item) => <code className="text-xs text-muted-foreground">{item.slug}</code>,
+      accessor: (item) => (
+        <span className="inline-flex items-center rounded-md bg-muted/80 px-2.5 py-1 font-mono text-[11px] font-medium text-foreground/75 ring-1 ring-inset ring-border/60">
+          {item.slug}
+        </span>
+      ),
       sortValue: (item) => item.slug,
     },
   ];
@@ -51,9 +55,9 @@ function PackagesIndexPage() {
         title="Packages"
         description={`${packages.length} ${packages.length === 1 ? "package" : "packages"} on the site.`}
         actions={
-          <Button asChild>
+          <Button asChild className="gap-2 shadow-sm">
             <Link to="/admin/packages/new">
-              <Plus aria-hidden="true" />
+              <Plus className="size-4" aria-hidden="true" />
               Add package
             </Link>
           </Button>

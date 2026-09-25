@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { ConfirmDialog } from "@/components/admin/confirm-dialog";
+import { cn } from "@/lib/utils";
 
 type SortValue = string | number | boolean | Date | null | undefined;
 
@@ -100,11 +101,11 @@ export function ContentList<TItem>({
 
   if (items.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed bg-card px-6 py-16 text-center">
-        <span className="mx-auto grid size-12 place-items-center rounded-full bg-primary/10 text-primary">
+      <div className="rounded-2xl border border-dashed border-border/80 bg-card/60 px-6 py-16 text-center backdrop-blur-xs">
+        <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary">
           <Inbox className="size-6" aria-hidden="true" />
         </span>
-        <p className="mt-4 font-medium text-foreground">{emptyMessage}</p>
+        <p className="mt-4 font-semibold text-foreground">{emptyMessage}</p>
         <p className="mt-1 text-sm text-muted-foreground">
           Use the add action to create the first item.
         </p>
@@ -113,11 +114,11 @@ export function ContentList<TItem>({
   }
 
   return (
-    <div className="overflow-hidden rounded-xl border bg-card shadow-sm">
+    <div className="overflow-hidden rounded-2xl border border-border/80 bg-card shadow-xs">
       <Table>
         {caption ? <caption className="sr-only">{caption}</caption> : null}
-        <TableHeader className="[&_tr]:bg-muted/60">
-          <TableRow>
+        <TableHeader className="[&_tr]:bg-muted/40 border-b border-border/80">
+          <TableRow className="hover:bg-transparent">
             {columns.map((column) => {
               const isSorted = sort?.key === column.key;
               const ariaSort = isSorted
@@ -127,22 +128,29 @@ export function ContentList<TItem>({
                 : "none";
 
               return (
-                <TableHead key={column.key} aria-sort={ariaSort} className={column.className}>
+                <TableHead
+                  key={column.key}
+                  aria-sort={ariaSort}
+                  className={cn(
+                    "h-11 text-xs font-semibold uppercase tracking-wider text-muted-foreground",
+                    column.className,
+                  )}
+                >
                   {column.sortValue ? (
                     <button
                       type="button"
-                      className="inline-flex min-h-8 items-center gap-1.5 rounded-sm text-left hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      className="inline-flex min-h-8 items-center gap-1.5 rounded-md px-1.5 py-1 text-left font-semibold uppercase tracking-wider text-muted-foreground transition-colors hover:bg-muted/80 hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                       onClick={() => toggleSort(column.key)}
                     >
                       {column.header}
                       {isSorted && sort.direction === "asc" ? (
-                        <ArrowUp className="size-3.5" aria-hidden="true" />
+                        <ArrowUp className="size-3.5 text-primary" aria-hidden="true" />
                       ) : null}
                       {isSorted && sort.direction === "desc" ? (
-                        <ArrowDown className="size-3.5" aria-hidden="true" />
+                        <ArrowDown className="size-3.5 text-primary" aria-hidden="true" />
                       ) : null}
                       {!isSorted ? (
-                        <ArrowUpDown className="size-3.5 opacity-50" aria-hidden="true" />
+                        <ArrowUpDown className="size-3.5 opacity-40" aria-hidden="true" />
                       ) : null}
                     </button>
                   ) : (
@@ -151,19 +159,21 @@ export function ContentList<TItem>({
                 </TableHead>
               );
             })}
-            <TableHead className="w-[9rem] text-right">Actions</TableHead>
+            <TableHead className="h-11 w-[9rem] text-right text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+              Actions
+            </TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {sortedItems.map((item) => (
-            <TableRow key={getItemId(item)}>
+            <TableRow key={getItemId(item)} className="transition-colors hover:bg-muted/30">
               {columns.map((column) => (
-                <TableCell key={column.key} className={column.className}>
+                <TableCell key={column.key} className={cn("py-3.5 text-sm", column.className)}>
                   {column.accessor(item)}
                 </TableCell>
               ))}
-              <TableCell className="text-right">
-                <div className="flex justify-end gap-1">
+              <TableCell className="py-3.5 text-right">
+                <div className="flex justify-end gap-1.5">
                   {renderEditLink(item)}
                   {onDelete ? (
                     <ConfirmDialog
@@ -173,8 +183,14 @@ export function ContentList<TItem>({
                       destructive
                       onConfirm={() => onDelete(item)}
                     >
-                      <Button type="button" variant="ghost" size="icon" aria-label="Delete item">
-                        <Trash2 className="text-destructive" aria-hidden="true" />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="size-8 text-muted-foreground hover:bg-destructive/10 hover:text-destructive"
+                        aria-label="Delete item"
+                      >
+                        <Trash2 className="size-4" aria-hidden="true" />
                       </Button>
                     </ConfirmDialog>
                   ) : null}

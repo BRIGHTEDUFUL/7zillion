@@ -69,31 +69,42 @@ function LoginPage() {
   return (
     <div className="admin-login grid min-h-svh lg:grid-cols-[1.05fr_1fr]">
       {/* Brand panel */}
-      <aside className="relative hidden overflow-hidden bg-primary text-primary-foreground lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
-        <div aria-hidden="true" className="admin-login-pattern absolute inset-0" />
+      <aside className="relative hidden overflow-hidden bg-gradient-to-br from-[#2D0440] via-[#3C0654] to-[#1E022B] text-white lg:flex lg:flex-col lg:justify-between lg:p-12 xl:p-16">
+        <div aria-hidden="true" className="admin-login-pattern absolute inset-0 opacity-80" />
         <div
           aria-hidden="true"
-          className="absolute -left-24 -top-24 size-72 rounded-full bg-white/10 blur-3xl"
+          className="absolute -left-24 -top-24 size-72 rounded-full bg-violet-400/15 blur-3xl"
         />
         <div
           aria-hidden="true"
-          className="absolute -bottom-32 -right-16 size-96 rounded-full bg-white/8 blur-3xl"
+          className="absolute -bottom-32 -right-16 size-96 rounded-full bg-fuchsia-500/10 blur-3xl"
         />
 
         <div className="relative">
-          <BrandLogo className="brand-logo--light" />
-          <p className="mt-3 text-xs font-bold uppercase tracking-[0.24em] text-white/60">
-            Admin workspace
-          </p>
+          <div className="inline-flex items-center gap-3 rounded-2xl bg-white/10 p-3 pr-5 ring-1 ring-white/20 backdrop-blur-md">
+            <div className="rounded-xl bg-white p-2 shadow-sm">
+              <BrandLogo variant="color" className="h-7 w-auto" />
+            </div>
+            <div>
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-white">
+                Seven Zillions
+              </p>
+              <p className="text-[11px] text-white/70">Admin Workspace</p>
+            </div>
+          </div>
         </div>
 
         <div className="relative max-w-xl">
-          <h1 className="text-4xl font-semibold leading-tight tracking-tight xl:text-5xl">
+          <div className="inline-flex items-center gap-2 rounded-full bg-white/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-violet-200 ring-1 ring-white/15 backdrop-blur-xs">
+            <span className="size-1.5 rounded-full bg-emerald-400 animate-pulse" />
+            Secure Management Portal
+          </div>
+          <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight text-white xl:text-5xl">
             Content management,
             <br />
             in one secure workspace.
           </h1>
-          <p className="mt-5 max-w-lg text-base leading-7 text-white/75">
+          <p className="mt-5 max-w-lg text-base leading-7 text-white/80">
             Manage the public Seven Zillions website — catalogue, projects, insights and company
             details — and publish updates the moment you save.
           </p>
@@ -103,46 +114,49 @@ function LoginPage() {
               const Icon = point.icon;
               return (
                 <li key={point.text} className="flex items-start gap-3.5">
-                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/12 ring-1 ring-white/20">
+                  <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-white/10 ring-1 ring-white/20 backdrop-blur-xs text-violet-200">
                     <Icon className="size-4.5" aria-hidden="true" />
                   </span>
-                  <span className="pt-1.5 text-sm leading-6 text-white/85">{point.text}</span>
+                  <span className="pt-1.5 text-sm leading-6 text-white/90">{point.text}</span>
                 </li>
               );
             })}
           </ul>
         </div>
 
-        <p className="relative text-xs leading-5 text-white/55">
+        <p className="relative text-xs leading-5 text-white/60">
           © Seven Zillions · Cooperation and Interdependence
         </p>
       </aside>
 
       {/* Form panel */}
       <main className="flex min-h-svh flex-col bg-background">
-        <div className="flex items-center justify-between border-b bg-primary px-4 py-3.5 text-primary-foreground sm:px-6 lg:hidden">
-          <BrandLogo className="brand-logo--light admin-login-logo-mobile" />
-          <span className="text-[10px] font-bold uppercase tracking-[0.22em] text-white/65">
-            Admin workspace
+        <div className="flex items-center justify-between border-b bg-card px-4 py-3 sm:px-6 lg:hidden">
+          <BrandLogo variant="color" className="h-8 w-auto" />
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+            Admin
           </span>
         </div>
 
         <div className="flex flex-1 items-center justify-center px-4 py-10 sm:px-6 lg:px-10">
           <div className="w-full max-w-md">
             <div className="mb-7">
-              <p className="mb-2 flex items-center gap-2 text-xs font-bold uppercase tracking-[0.18em] text-primary">
-                <span className="inline-block size-2 rounded-[2px] bg-primary" aria-hidden="true" />
-                Seven Zillions
-              </p>
-              <h2 className="text-3xl font-semibold tracking-tight text-foreground">
+              <div className="mb-5 hidden lg:block">
+                <BrandLogo variant="color" className="h-10 w-auto" />
+              </div>
+              <div className="mb-2 inline-flex items-center gap-2 rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-[0.16em] text-primary">
+                <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+                Administrative Access
+              </div>
+              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 Welcome back
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Sign in to manage the live website.
+              <p className="mt-1.5 text-sm leading-6 text-muted-foreground">
+                Sign in to manage the live Seven Zillions website.
               </p>
             </div>
 
-            <Card className="shadow-xl shadow-black/5">
+            <Card className="rounded-2xl border-border/80 shadow-lg shadow-violet-950/5">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <LockKeyhole className="size-4.5 text-primary" aria-hidden="true" />

@@ -22,19 +22,25 @@ function ProductsIndexPage() {
     {
       key: "name",
       header: "Name",
-      accessor: (product) => <span className="font-medium">{product.name}</span>,
+      accessor: (product) => <span className="font-semibold text-foreground">{product.name}</span>,
       sortValue: (product) => product.name,
     },
     {
       key: "category",
       header: "Category",
-      accessor: (product) => product.category || "—",
+      accessor: (product) => (
+        <span className="text-muted-foreground">{product.category || "—"}</span>
+      ),
       sortValue: (product) => product.category,
     },
     {
       key: "slug",
       header: "Slug",
-      accessor: (product) => <code className="text-xs text-muted-foreground">{product.slug}</code>,
+      accessor: (product) => (
+        <span className="inline-flex items-center rounded-md bg-muted/80 px-2.5 py-1 font-mono text-[11px] font-medium text-foreground/75 ring-1 ring-inset ring-border/60">
+          {product.slug}
+        </span>
+      ),
       sortValue: (product) => product.slug,
     },
   ];
@@ -57,9 +63,9 @@ function ProductsIndexPage() {
         title="Products"
         description={`${products.length} ${products.length === 1 ? "product" : "products"} in the live catalogue.`}
         actions={
-          <Button asChild>
+          <Button asChild className="gap-2 shadow-sm">
             <Link to="/admin/products/new">
-              <Plus aria-hidden="true" />
+              <Plus className="size-4" aria-hidden="true" />
               Add product
             </Link>
           </Button>
