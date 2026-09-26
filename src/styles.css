@@ -2178,6 +2178,31 @@ html.is-ready .inner-intro {
   .footer-brand {
     grid-column: 1 / -1;
   }
+
+  /* ── Touch targets ─────────────────────────────────────────────────
+     These links are single lines of 13–14px text (~20px tall), which is
+     under the 24px minimum target. Padding grows the hit area and the
+     matching negative margin pulls the box straight back, so nothing on
+     screen moves — only the tappable area gets bigger. */
+  .footer-grid a,
+  .contact-facts a,
+  .contact-list li a,
+  .enquiry-phone a,
+  .text-link,
+  .inline-link {
+    padding-block: 8px;
+    margin-block: -8px;
+  }
+  .breadcrumbs a {
+    padding-block: 9px;
+    margin-block: -9px;
+  }
+
+  /* iOS Safari zooms a focused field that is set below 16px. */
+  .quote-form input,
+  .quote-form textarea {
+    font-size: 16px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -2249,12 +2274,14 @@ html.is-ready .inner-intro {
     height: 44px;
   }
   .hero-arrow {
-    width: 36px;
-    height: 36px;
+    /* 44px tall is set by .hero-dot; keep the arrows square-ish but
+       thumb-sized instead of the desktop 36px hit area. */
+    width: 40px;
+    height: 40px;
   }
   .hero-count {
     min-width: 48px;
-    font-size: 10px;
+    font-size: 11px;
   }
   .scroll-cue,
   .contact-rail {
@@ -2532,6 +2559,12 @@ html.is-ready .inner-intro {
     align-items: flex-start;
     gap: 12px;
   }
+  /* 10px + 0.28em tracking was desktop-composition sizing; the bar stacks
+     here, so the bigger size fits on one line with slightly tighter tracking. */
+  .footer-slogan-bar .slogan {
+    font-size: 11px;
+    letter-spacing: 0.18em;
+  }
 }
 
 /* ============================================================
@@ -2759,6 +2792,19 @@ html.is-ready .inner-intro {
   text-transform: uppercase;
   background: hsl(281 70% 10% / 0.7);
   padding: 5px 10px;
+}
+
+@media (max-width: 1020px) {
+  /* 9px is a desktop label size — unreadable on a phone-sized card. */
+  .page-card-media-index {
+    font-size: 11px;
+  }
+
+  /* The stacked tel: links above grow their hit area by 8px each way, so the
+     column needs a matching visual gap to keep the targets from overlapping. */
+  .enquiry-phone div {
+    gap: 16px;
+  }
 }
 
 /* ── Responsive ── */

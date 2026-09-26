@@ -144,7 +144,7 @@ function LoginPage() {
       <main className="flex min-h-svh flex-col bg-background">
         <div className="flex items-center justify-between border-b bg-card px-4 py-3 sm:px-6 lg:hidden">
           <BrandLogo variant="color" className="h-8 w-auto" />
-          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary">
+          <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wider text-primary">
             Admin
           </span>
         </div>
@@ -245,7 +245,7 @@ function LoginPage() {
             <div className="mt-4 flex justify-center">
               <Link
                 to="/"
-                className="inline-flex items-center gap-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
+                className="inline-flex items-center gap-1.5 py-2 -my-2 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground"
               >
                 <ArrowLeft className="size-3.5" aria-hidden="true" />
                 Back to the main site
