@@ -6,6 +6,7 @@ import type {
   Product,
   Solution,
   SpecEntry,
+  Video,
 } from "@/types/content";
 export type {
   Company,
@@ -18,6 +19,7 @@ export type {
   Service,
   Solution,
   SpecEntry,
+  Video,
 } from "@/types/content";
 
 import aboutImage from "@/assets/brand/about.jpg";
@@ -33,7 +35,7 @@ import csdLineImage from "@/assets/brand/line-csd.jpg";
 import juiceLineImage from "@/assets/brand/line-juice.jpg";
 import waterLineImage from "@/assets/brand/line-water.jpg";
 import projectFiveLImage from "@/assets/brand/project-5l.jpg";
-import projectFilterImage from "@/assets/brand/project-filter.jpg";
+import projectCanImage from "@/assets/brand/project-can.jpg";
 import projectWaterImage from "@/assets/brand/project-water.jpg";
 
 /**
@@ -63,7 +65,7 @@ export const company = {
   whatsapp: "+233 20 509 9553",
   whatsappHref: "https://wa.me/233205099553",
   promise: "On-Time Delivery",
-  founded: "20+ years of packaging engineering",
+  founded: "10 years of packaging engineering",
 } as const;
 
 /**
@@ -124,6 +126,7 @@ export type StaticPath =
   | "/products"
   | "/solutions"
   | "/projects"
+  | "/videos"
   | "/services"
   | "/about"
   | "/blog"
@@ -175,6 +178,7 @@ export const footerColumns: FooterColumn[] = [
     links: [
       { label: "About us", to: "/about" },
       { label: "Projects", to: "/projects" },
+      { label: "Videos", to: "/videos" },
       { label: "Services", to: "/services" },
       { label: "Knowledge center", to: "/blog" },
       { label: "Contact us", to: "/contact" },
@@ -693,6 +697,12 @@ export const services = [
 
 export const projects = [
   {
+    date: "2026-09-24",
+    title: "Aluminium Can Filling and Seaming Monobloc Commissioned in West Africa",
+    copy: "A stainless-steel can filling and seaming monobloc supplied and commissioned for a West African beverage producer — cans are rinsed, filled and seamed inside one guarded block between the infeed and outfeed conveyors, operated from the line HMI and accepted against fill level, seam integrity and changeover performance.",
+    image: projectCanImage,
+  },
+  {
     date: "2025-12-10",
     title: "1,200 BPH Fully Automatic 5L Water Bottling Line in Africa",
     copy: "A 1,200 BPH fully automatic 5L water bottling line delivered in Africa, integrating bottle feeding, rinsing, filling, capping, coding, packing and palletizing.",
@@ -703,12 +713,6 @@ export const projects = [
     title: "24,000 BPH Mineral Water Production Line Commissioned in Africa",
     copy: "A 24,000 BPH mineral water production line was installed and commissioned for an African customer, adding efficient local bottled-water capacity.",
     image: projectWaterImage,
-  },
-  {
-    date: "2023-12-11",
-    title: "25 T/H Water Treatment System Commissioned in West Africa",
-    copy: "Seven Zillions designed, built and commissioned a 25 T/H water treatment system for a West African producer — filtration, carbon and softening ahead of reverse osmosis, with treated-water storage delivering the required treated-water standard.",
-    image: projectFilterImage,
   },
 ];
 
@@ -920,6 +924,40 @@ export const defaultPages: PagesContent = {
   },
   contactChecklist: [...checklist],
 };
+
+/**
+ * Built-in video gallery — the seed the admin panel starts from and the
+ * fallback the public pages render while the `videos` row has never been
+ * saved (Admin → Videos). Two of these are YouTube Shorts, which
+ * src/lib/youtube.ts detects from the /shorts/ path and renders in a
+ * 9:16 frame instead of letterboxing them inside 16:9.
+ */
+export const defaultVideos: Video[] = [
+  {
+    title: "Line setup — filling section running",
+    caption: "Rinsing, filling and capping working together on site.",
+    tag: "Setup",
+    videoUrl: "https://youtube.com/shorts/5-IZKg-pwhI",
+  },
+  {
+    title: "Commissioning walkthrough",
+    caption: "Installation, testing and hand-over at a customer plant.",
+    tag: "Project",
+    videoUrl: "https://youtu.be/Xk9wj7b8wLo",
+  },
+  {
+    title: "Production line in operation",
+    caption: "A delivered line running at the customer's site.",
+    tag: "Project",
+    videoUrl: "https://youtu.be/ROPTFb7w51M",
+  },
+  {
+    title: "Machine detail — capping and packing",
+    caption: "A close-up of the equipment doing its work.",
+    tag: "Setup",
+    videoUrl: "https://youtube.com/shorts/yn7jPRJYsDc",
+  },
+];
 
 export const customers = [
   "Ghana",

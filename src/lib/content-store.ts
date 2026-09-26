@@ -11,6 +11,7 @@ import type {
   Project,
   Service,
   Solution,
+  Video,
 } from "@/types/content";
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -70,6 +71,10 @@ export interface ContentStore {
   /** null when the deployment has never saved page copy. */
   getPages(): Promise<PagesContent | null>;
   setPages(pages: PagesContent): Promise<void>;
+
+  /** null when the deployment has never saved the gallery (serve defaults). */
+  getVideos(): Promise<Video[] | null>;
+  setVideos(videos: Video[]): Promise<void>;
 
   appendActivity(entry: ActivityLogEntry | ActivityEntryInput): Promise<void>;
   queryActivity(opts?: ActivityQueryOptions): Promise<ActivityLogEntry[]>;
@@ -315,6 +320,19 @@ export class ConvexContentStore implements ContentStore {
 
   async setPages(pages: PagesContent): Promise<void> {
     await convexInternalMutation(this.url, "content:setPages", { data: JSON.stringify(pages) });
+  }
+
+  // ── Video gallery ───────────────────────────────────────────────────────
+
+  async getVideos(): Promise<Video[] | null> {
+    const raw = (await convexQuery(this.url, "content:getVideos")) as string | null;
+    // null = the row has never been written; "[]" is a deliberate empty list.
+    if (raw === null || raw === undefined) return null;
+    return parseJson<Video[]>(raw, "videos");
+  }
+
+  async setVideos(videos: Video[]): Promise<void> {
+    await convexInternalMutation(this.url, "content:setVideos", { data: JSON.stringify(videos) });
   }
 
   // ── Activity log ─────────────────────────────────────────────────────────

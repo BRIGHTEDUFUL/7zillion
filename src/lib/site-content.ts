@@ -1,4 +1,5 @@
-import type { Company, PagesContent } from "@/types/content";
+import type { Company, PagesContent, Video } from "@/types/content";
+import { extractVideoId } from "@/lib/youtube";
 
 /**
  * Pure helpers that sit between the database record and the pages that render
@@ -80,4 +81,21 @@ export function sanitizePages(pages: PagesContent): PagesContent {
     about,
     contactChecklist: cleanList(pages.contactChecklist),
   };
+}
+
+/**
+ * A gallery row is only worth storing when it has something to show: a title
+ * the visitor can read and a link that actually resolves to a YouTube video.
+ * Blank rows are what the admin list editor produces by accident, and a
+ * non-YouTube URL would silently render no tile at all.
+ */
+export function sanitizeVideos(videos: Video[]): Video[] {
+  return videos
+    .map((video) => ({
+      title: video.title.trim(),
+      caption: (video.caption ?? "").trim(),
+      tag: (video.tag ?? "").trim(),
+      videoUrl: video.videoUrl.trim(),
+    }))
+    .filter((video) => video.title.length > 0 && extractVideoId(video.videoUrl) !== null);
 }

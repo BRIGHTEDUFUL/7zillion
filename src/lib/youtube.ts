@@ -16,18 +16,8 @@ export function toEmbedUrl(url: string): string | null {
 
 /** Watch / short / embed URL → video id, or null when the URL is not YouTube. */
 export function extractVideoId(url: string): string | null {
-  let parsed: URL;
-  try {
-    parsed = new URL(url);
-  } catch {
-    // Tolerate scheme-less pastes like "youtu.be/abc" (the admin form's zod
-    // validation rejects those, but rendering old rows should not break).
-    try {
-      parsed = new URL(`https://${url}`);
-    } catch {
-      return null;
-    }
-  }
+  const parsed = parseUrl(url);
+  if (!parsed) return null;
 
   const host = parsed.hostname.toLowerCase();
 
@@ -50,7 +40,53 @@ export function extractVideoId(url: string): string | null {
   return match?.[2] ?? null;
 }
 
-/** Thumbnail served by YouTube for a video id (works without an API key). */
-export function toThumbnailUrl(videoId: string): string {
-  return `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
+/**
+ * Frame shape the video should be shown in.
+ *
+ * A Shorts link is vertical by definition, so putting it in the 16:9 box the
+ * rest of the site uses would letterbox it down to a thin strip with black
+ * bars either side. Anything else — watch, youtu.be, embed, live — gets the
+ * standard landscape frame.
+ *
+ * Limitation: a vertical video reached through a youtu.be or /watch URL looks
+ * identical to a landscape one, so it stays 16:9. Only the /shorts/ path
+ * carries the signal.
+ */
+export type VideoAspect = "16:9" | "9:16";
+
+export function toAspect(url: string): VideoAspect {
+  const parsed = parseUrl(url);
+  if (!parsed) return "16:9";
+
+  const host = parsed.hostname.toLowerCase();
+  const isYouTube = /(^|\.)youtube\.com$/.test(host) || /(^|\.)youtube-nocookie\.com$/.test(host);
+
+  return isYouTube && parsed.pathname.startsWith("/shorts/") ? "9:16" : "16:9";
+}
+
+/** Tolerate scheme-less pastes like "youtu.be/abc". */
+function parseUrl(url: string): URL | null {
+  try {
+    return new URL(url);
+  } catch {
+    try {
+      return new URL(`https://${url}`);
+    } catch {
+      return null;
+    }
+  }
+}
+
+/**
+ * Thumbnail served by YouTube for a video id (works without an API key).
+ *
+ * The normalised `hqdefault` is always 480×360, which pillars a vertical
+ * video inside black bars — so Shorts ask for `oardefault`, the video's true
+ * aspect ratio. That file is not generated for every upload; callers must
+ * fall back to `hqdefault` on error.
+ */
+export function toThumbnailUrl(videoId: string, aspect: VideoAspect = "16:9"): string {
+  return aspect === "9:16"
+    ? `https://i.ytimg.com/vi/${videoId}/oardefault.jpg`
+    : `https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`;
 }

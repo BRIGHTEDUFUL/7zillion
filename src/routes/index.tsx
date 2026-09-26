@@ -17,12 +17,14 @@ import { listSolutionsFn } from "@/api/solutions";
 import { listPackagesFn } from "@/api/packages";
 import { listProjectsFn } from "@/api/projects";
 import { listInsightsFn } from "@/api/insights";
+import { listVideosFn } from "@/api/videos";
 import { recordActivityFn } from "@/api/activity";
 import { ContactRail } from "@/components/contact-rail";
 import { WhatsAppIcon } from "@/components/icons";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
+import { VideoGallery } from "@/components/video-gallery";
 import { useSectionReveal } from "@/hooks/use-site-effects";
 import { useComposeMail } from "@/hooks/use-compose-mail";
 import { useSiteCompany } from "@/hooks/use-site-company";
@@ -35,22 +37,24 @@ import heroLineImage from "@/assets/brand/hero-line.webp";
 import heroMachinesImage from "@/assets/brand/hero-machines.webp";
 import heroWaterTreatmentImage from "@/assets/brand/hero-water-treatment.webp";
 import supportImage from "@/assets/brand/support.jpg";
+import supportPartsImage from "@/assets/brand/support-parts.jpg";
 import supportTwoImage from "@/assets/brand/support2.jpg";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
     // Company details come from the root route's record (SiteCompanyProvider).
-    const [products, solutions, packages, projects, insights] = await Promise.all([
+    const [products, solutions, packages, projects, insights, videos] = await Promise.all([
       listProductsFn(),
       listSolutionsFn(),
       listPackagesFn(),
       listProjectsFn(),
       listInsightsFn(),
+      listVideosFn(),
     ]);
     void recordActivityFn({
       data: { eventType: "page_view", path: "/", timestamp: new Date().toISOString() },
     });
-    return { products, solutions, packages, projects, insights };
+    return { products, solutions, packages, projects, insights, videos };
   },
   head: () => ({
     meta: [
@@ -111,14 +115,14 @@ const SUPPORT_CARDS = [
   {
     eyebrow: "After-sales",
     title: "Spare parts & maintenance",
-    image: supportImage,
+    image: supportPartsImage,
     to: "/services",
     icon: "parts" as const,
   },
 ];
 
 function HomePage() {
-  const { products, solutions, packages, projects, insights } = Route.useLoaderData();
+  const { products, solutions, packages, projects, insights, videos } = Route.useLoaderData();
   const company = useSiteCompany();
 
   const [slide, setSlide] = useState(0);
@@ -358,7 +362,7 @@ function HomePage() {
               alt="Seven Zillions beverage packaging machinery factory"
             />
             <div className="experience">
-              <strong>20+</strong>
+              <strong>10</strong>
               <span>
                 years of
                 <br />
@@ -529,6 +533,20 @@ function HomePage() {
             </article>
           ))}
         </div>
+      </section>
+
+      <section id="videos" className="section shell">
+        <SectionHeading
+          eyebrow="Watch the work"
+          title="Projects and setups in motion"
+          action="All videos"
+          to="/videos"
+        />
+        <p className="wide-copy">
+          A picture shows the line; a video shows it running. Press play to watch the equipment and
+          installations we have delivered — nothing loads until you do.
+        </p>
+        <VideoGallery videos={videos} limit={4} />
       </section>
 
       <section id="blog" className="insights-section">

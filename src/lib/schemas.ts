@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { extractVideoId } from "@/lib/youtube";
+
 /**
  * Content is edited in a number of different forms, so the schemas below are
  * deliberately strict about object keys.  A typo in a form field should be a
@@ -180,6 +182,23 @@ export const ServiceSchema = z
   .object({
     title: requiredText,
     copy: requiredText,
+  })
+  .strict();
+
+/**
+ * A gallery row must resolve to a real YouTube video: a URL that passes zod's
+ * .url() but points at Vimeo (or anywhere else) would silently render no tile,
+ * so the URL is pushed through the same parser the embed component uses.
+ */
+export const VideoSchema = z
+  .object({
+    title: requiredText,
+    caption: z.string().optional().or(z.literal("")),
+    tag: z.string().optional().or(z.literal("")),
+    videoUrl: z
+      .string()
+      .min(1, "Required")
+      .refine((value) => extractVideoId(value.trim()) !== null, "Paste a YouTube link"),
   })
   .strict();
 

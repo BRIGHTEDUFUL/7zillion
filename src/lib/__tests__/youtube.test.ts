@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { extractVideoId, toEmbedUrl, toThumbnailUrl } from "../youtube";
+import { extractVideoId, toAspect, toEmbedUrl, toThumbnailUrl } from "../youtube";
 
 describe("YouTube URL helpers", () => {
   it("accepts a standard watch URL", () => {
@@ -60,5 +60,32 @@ describe("YouTube URL helpers", () => {
 
   it("builds the thumbnail URL from the video id", () => {
     expect(toThumbnailUrl("dQw4w9WgXcQ")).toBe("https://i.ytimg.com/vi/dQw4w9WgXcQ/hqdefault.jpg");
+  });
+
+  it("reads a Shorts link as portrait and everything else as landscape", () => {
+    expect(toAspect("https://youtube.com/shorts/5-IZKg-pwhI")).toBe("9:16");
+    expect(toAspect("https://www.youtube.com/shorts/tLB3E8gM9UE?feature=share")).toBe("9:16");
+    expect(toAspect("youtube.com/shorts/yn7jPRJYsDc")).toBe("9:16");
+
+    expect(toAspect("https://youtu.be/Xk9wj7b8wLo")).toBe("16:9");
+    expect(toAspect("https://www.youtube.com/watch?v=ROPTFb7w51M")).toBe("16:9");
+    expect(toAspect("https://www.youtube.com/embed/ROPTFb7w51M")).toBe("16:9");
+    expect(toAspect("https://www.youtube.com/live/ROPTFb7w51M")).toBe("16:9");
+  });
+
+  it("never guesses portrait from a non-YouTube host or an unusable link", () => {
+    expect(toAspect("https://example.com/shorts/abc")).toBe("16:9");
+    expect(toAspect("youtu.be/shorts/abc")).toBe("16:9");
+    expect(toAspect("")).toBe("16:9");
+    expect(toAspect("not a url")).toBe("16:9");
+  });
+
+  it("asks for the video's own thumbnail shape only for a portrait video", () => {
+    expect(toThumbnailUrl("5-IZKg-pwhI", "9:16")).toBe(
+      "https://i.ytimg.com/vi/5-IZKg-pwhI/oardefault.jpg",
+    );
+    expect(toThumbnailUrl("Xk9wj7b8wLo", "16:9")).toBe(
+      "https://i.ytimg.com/vi/Xk9wj7b8wLo/hqdefault.jpg",
+    );
   });
 });

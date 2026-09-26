@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from "vitest";
 
-import { mergeCompany, mergePages, sanitizePages } from "@/lib/site-content";
+import { mergeCompany, mergePages, sanitizePages, sanitizeVideos } from "@/lib/site-content";
 import { defaultPages, fallbackCompany } from "@/data/site";
 import type { PagesContent } from "@/types/content";
 
@@ -104,5 +104,54 @@ describe("sanitizePages", () => {
 
   it("round-trips the built-in copy unchanged", () => {
     expect(sanitizePages(structuredClone(defaultPages))).toEqual(defaultPages);
+  });
+});
+
+describe("sanitizeVideos", () => {
+  const valid = {
+    title: "Commissioning walkthrough",
+    caption: "Installation, testing and hand-over.",
+    tag: "Project",
+    videoUrl: "https://youtu.be/Xk9wj7b8wLo",
+  };
+
+  it("keeps a complete row and trims it", () => {
+    expect(
+      sanitizeVideos([
+        {
+          ...valid,
+          title: "  Commissioning walkthrough  ",
+          videoUrl: "  https://youtu.be/Xk9wj7b8wLo ",
+        },
+      ]),
+    ).toEqual([valid]);
+  });
+
+  it("normalises a missing caption or tag to an empty string", () => {
+    const [row] = sanitizeVideos([{ title: "A line", videoUrl: valid.videoUrl }]);
+
+    expect(row).toEqual({ title: "A line", caption: "", tag: "", videoUrl: valid.videoUrl });
+  });
+
+  it("drops rows that would render nothing on the page", () => {
+    const cleaned = sanitizeVideos([
+      { ...valid, title: "   " },
+      { ...valid, title: "" },
+      { ...valid, videoUrl: "" },
+      { ...valid, videoUrl: "https://example.com/watch?v=Xk9wj7b8wLo" },
+      { ...valid, videoUrl: "https://www.youtube.com/playlist?list=PL123" },
+      valid,
+    ]);
+
+    expect(cleaned).toEqual([valid]);
+  });
+
+  it("never strips a key the public page reads", () => {
+    expect(Object.keys(sanitizeVideos([valid])[0]!).sort()).toEqual([
+      "caption",
+      "tag",
+      "title",
+      "videoUrl",
+    ]);
   });
 });

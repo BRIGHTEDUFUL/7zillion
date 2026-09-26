@@ -11,7 +11,7 @@ npm run build        # production build → .output/
 npm start             # run the built server (reads PORT, defaults 3000)
 npm run typecheck    # tsc --noEmit
 npm run lint         # eslint (0 errors allowed; 6 pre-existing warnings)
-npm test             # vitest (82 tests)
+npm test             # vitest (99 tests)
 npm run format       # prettier --write
 ```
 
@@ -43,13 +43,13 @@ Gate before any push: `npm run typecheck && npm run lint && npm test && npm run 
   `npm run build`, entry `.output/server/index.mjs`, Node 24, env vars in panel).
 - **Content**: every shared record is a Convex singleton holding a JSON string
   (`content:*` functions): `company` (Admin → Company), `services` (Admin →
-  Services) and `pages` (Admin → Page content — the /about copy, the equipment
-  and production line lists, support lines and the /contact checklist).
-  Public reads live in `src/api/*` and merge the stored row over the built-in
-  copy (`fallbackCompany`, `defaultPages` in `src/data/site.ts`), logging and
-  falling back on error, so a missing row or an undeployed table never blanks a
-  block. Blank rows from the list editors are dropped on save
-  (`sanitizePages` in `src/lib/site-content.ts`).
+  Services), `videos` (Admin → Videos) and `pages` (Admin → Page content — the
+  /about copy, the equipment and production line lists, support lines and the
+  /contact checklist). Public reads live in `src/api/*` and merge the stored row
+  over the built-in copy (`fallbackCompany`, `defaultPages`, `defaultVideos` in
+  `src/data/site.ts`), logging and falling back on error, so a missing row or an
+  undeployed table never blanks a block. Blank rows from the list editors are
+  dropped on save (`sanitizePages`, `sanitizeVideos` in `src/lib/site-content.ts`).
 - **Company record in the layout**: the root route loads it once per
   navigation and `SiteCompanyProvider` (`src/components/site-company-provider.tsx`)
   publishes it to the footer, contact rail, CTA bars and quote form through
@@ -63,5 +63,12 @@ Gate before any push: `npm run typecheck && npm run lint && npm test && npm run 
   answer explaining how a quote is calculated.
 - Images upload straight to Convex storage (presigned URL), never to local disk.
 - YouTube: `videoUrl` field on projects/products renders `YouTubeEmbed`
-  (click-to-play facade) — any watch/shorts/embed URL is accepted.
+  (click-to-play facade) — any watch/shorts/embed URL is accepted. The public
+  gallery (homepage `#videos` section and `/videos`, edited in Admin → Videos)
+  uses `VideoGallery` + `VideoLightbox` instead: a thumbnail grid that opens a
+  full-screen player, again with no iframe until a visitor presses play.
+  `src/lib/youtube.ts` owns the URL maths — `toAspect()` reads a
+  `youtube.com/shorts/…` link as `9:16` so a vertical clip is framed portrait
+  rather than letterboxed inside 16:9 (a vertical clip reached through a
+  `youtu.be` or `/watch` URL has no such signal and stays `16:9`).
 - Never commit `.env` / `.env.local` (git-ignored; `.env.example` is the template).

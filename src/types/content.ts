@@ -122,6 +122,22 @@ export type Service = {
   copy: string;
 };
 
+/**
+ * One entry of the public video gallery, edited from Admin → Videos and shown
+ * on the homepage section and /videos. `videoUrl` accepts any YouTube shape
+ * (watch, youtu.be, /shorts/, embed) — src/lib/youtube.ts resolves it to an
+ * embed URL, a thumbnail and a display aspect ratio.
+ */
+export type Video = {
+  /** Heading shown under the thumbnail. */
+  title: string;
+  /** Optional one-line description; blank hides the line. */
+  caption?: string | undefined;
+  /** Optional grouping chip, e.g. "Project" or "Setup". */
+  tag?: string | undefined;
+  videoUrl: string;
+};
+
 export type EventType =
   "page_view" | "whatsapp_click" | "contact_submission" | "enquiry_submission";
 

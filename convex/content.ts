@@ -335,6 +335,35 @@ export const setPages = internalMutation({
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Videos (singleton list — public gallery)
+//
+// getVideos returns null when the deployment has never saved the list, so the
+// caller can tell "never edited" (serve defaultVideos) apart from "edited to an
+// empty list" (hide the gallery). getServices predates that distinction and
+// answers "[]" for both.
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const getVideos = query({
+  args: {},
+  handler: async (ctx) => {
+    const row = await ctx.db.query("videos").first();
+    return row?.data ?? null;
+  },
+});
+
+export const setVideos = internalMutation({
+  args: { data: v.string() },
+  handler: async (ctx, { data }) => {
+    const existing = await ctx.db.query("videos").first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { data });
+    } else {
+      await ctx.db.insert("videos", { data });
+    }
+  },
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Activity log
 // ──────────────────────────────────────────────────────────────────────────────
 

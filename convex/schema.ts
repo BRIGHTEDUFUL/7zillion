@@ -57,6 +57,13 @@ export default defineSchema({
     data: v.string(), // JSON blob of PagesContent
   }),
 
+  // ── Singleton: public video gallery (/videos + the homepage section) ───
+  // One row holding a JSON array of Video. null (no row ever saved) means
+  // "never edited", which the ContentStore turns into defaultVideos.
+  videos: defineTable({
+    data: v.string(), // JSON array of Video objects
+  }),
+
   // ── Activity log ─────────────────────────────────────────────────────────
   activityLog: defineTable({
     eventType: v.string(),

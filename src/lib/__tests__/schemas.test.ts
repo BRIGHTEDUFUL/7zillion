@@ -20,6 +20,7 @@ import {
   ProjectSchema,
   InsightSchema,
   ServiceSchema,
+  VideoSchema,
   DateStringSchema,
 } from "@/lib/schemas";
 
@@ -41,7 +42,7 @@ const validCompany = {
   whatsappHref: "https://wa.me/233205099553",
   whatsappMessage: "Hello Seven Zillions, please send me more information.",
   promise: "On-Time",
-  founded: "20+ years",
+  founded: "10 years",
 } as const;
 
 const validProduct = {
@@ -390,5 +391,72 @@ describe("Valid objects pass their schemas", () => {
   });
   it("ServiceSchema accepts a valid service", () => {
     expect(ServiceSchema.safeParse(validService).success).toBe(true);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Video gallery rows
+// ──────────────────────────────────────────────────────────────────────────────
+
+describe("VideoSchema", () => {
+  const validVideo = {
+    title: "Line setup — filling section running",
+    caption: "Rinsing, filling and capping working together on site.",
+    tag: "Setup",
+    videoUrl: "https://youtube.com/shorts/5-IZKg-pwhI",
+  };
+
+  it("accepts every YouTube URL shape the site supports", () => {
+    const urls = [
+      "https://www.youtube.com/watch?v=Xk9wj7b8wLo",
+      "https://youtu.be/Xk9wj7b8wLo",
+      "https://youtube.com/shorts/5-IZKg-pwhI",
+      "https://www.youtube.com/embed/Xk9wj7b8wLo",
+      "https://www.youtube-nocookie.com/embed/Xk9wj7b8wLo",
+    ];
+
+    for (const videoUrl of urls) {
+      const result = VideoSchema.safeParse({ ...validVideo, videoUrl });
+      expect(result.success, `Expected ${videoUrl} to be valid`).toBe(true);
+    }
+  });
+
+  it("treats caption and tag as optional", () => {
+    expect(VideoSchema.safeParse({ title: "A line", videoUrl: validVideo.videoUrl }).success).toBe(
+      true,
+    );
+    expect(
+      VideoSchema.safeParse({
+        title: "A line",
+        caption: "",
+        tag: "",
+        videoUrl: "https://youtu.be/Xk9wj7b8wLo",
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a blank title", () => {
+    expect(VideoSchema.safeParse({ ...validVideo, title: "   " }).success).toBe(false);
+    expect(VideoSchema.safeParse({ ...validVideo, title: "" }).success).toBe(false);
+  });
+
+  it("rejects a URL that is not a YouTube video", () => {
+    // Passes zod's shape check but would silently render no tile at all.
+    for (const videoUrl of [
+      "",
+      "not a url",
+      "https://example.com/watch?v=Xk9wj7b8wLo",
+      "https://www.youtube.com/playlist?list=PL123",
+      "https://vimeo.com/12345",
+    ]) {
+      expect(
+        VideoSchema.safeParse({ ...validVideo, videoUrl }).success,
+        `Expected ${videoUrl || "(blank)"} to be rejected`,
+      ).toBe(false);
+    }
+  });
+
+  it("rejects unknown keys", () => {
+    expect(VideoSchema.safeParse({ ...validVideo, duration: "1:20" }).success).toBe(false);
   });
 });

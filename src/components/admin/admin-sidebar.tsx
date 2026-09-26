@@ -9,6 +9,7 @@ import {
   Lightbulb,
   PackageOpen,
   PanelsTopLeft,
+  Video,
   Wrench,
 } from "lucide-react";
 import { Link, useRouterState } from "@tanstack/react-router";
@@ -24,6 +25,7 @@ const workspaceNavigation = [
   { to: "/admin/solutions", label: "Solutions", icon: PanelsTopLeft, exact: false },
   { to: "/admin/packages", label: "Packages", icon: PackageOpen, exact: false },
   { to: "/admin/projects", label: "Projects", icon: Gauge, exact: false },
+  { to: "/admin/videos", label: "Videos", icon: Video, exact: false },
   { to: "/admin/insights", label: "Insights", icon: Lightbulb, exact: false },
   { to: "/admin/services", label: "Services", icon: Wrench, exact: false },
 ] as const;

@@ -23,6 +23,7 @@ import { Route as ProjectsIndexRouteImport } from './routes/projects/index'
 import { Route as ServicesIndexRouteImport } from './routes/services/index'
 import { Route as SolutionsIndexRouteImport } from './routes/solutions/index'
 import { Route as SolutionsSlugRouteImport } from './routes/solutions/$slug'
+import { Route as VideosIndexRouteImport } from './routes/videos/index'
 import { Route as AdminAuthenticatedCompanyRouteImport } from './routes/admin/_authenticated/company'
 import { Route as AdminAuthenticatedDashboardRouteImport } from './routes/admin/_authenticated/dashboard'
 import { Route as AdminAuthenticatedPagesRouteImport } from './routes/admin/_authenticated/pages'
@@ -43,6 +44,7 @@ import { Route as AdminAuthenticatedServicesIndexRouteImport } from './routes/ad
 import { Route as AdminAuthenticatedSolutionsIndexRouteImport } from './routes/admin/_authenticated/solutions/index'
 import { Route as AdminAuthenticatedSolutionsSlugRouteImport } from './routes/admin/_authenticated/solutions/$slug'
 import { Route as AdminAuthenticatedSolutionsNewRouteImport } from './routes/admin/_authenticated/solutions/new'
+import { Route as AdminAuthenticatedVideosIndexRouteImport } from './routes/admin/_authenticated/videos/index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -111,6 +113,11 @@ const SolutionsIndexRoute = SolutionsIndexRouteImport.update({
 const SolutionsSlugRoute = SolutionsSlugRouteImport.update({
   id: '/solutions/$slug',
   path: '/solutions/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const VideosIndexRoute = VideosIndexRouteImport.update({
+  id: '/videos/',
+  path: '/videos/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminAuthenticatedCompanyRoute =
@@ -232,6 +239,12 @@ const AdminAuthenticatedSolutionsNewRoute =
     path: '/solutions/new',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedVideosIndexRoute =
+  AdminAuthenticatedVideosIndexRouteImport.update({
+    id: '/videos/',
+    path: '/videos/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -247,6 +260,7 @@ export interface FileRoutesByFullPath {
   '/projects/': typeof ProjectsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/solutions/': typeof SolutionsIndexRoute
+  '/videos/': typeof VideosIndexRoute
   '/admin/company': typeof AdminAuthenticatedCompanyRoute
   '/admin/dashboard': typeof AdminAuthenticatedDashboardRoute
   '/admin/pages': typeof AdminAuthenticatedPagesRoute
@@ -267,6 +281,7 @@ export interface FileRoutesByFullPath {
   '/admin/projects/': typeof AdminAuthenticatedProjectsIndexRoute
   '/admin/services/': typeof AdminAuthenticatedServicesIndexRoute
   '/admin/solutions/': typeof AdminAuthenticatedSolutionsIndexRoute
+  '/admin/videos/': typeof AdminAuthenticatedVideosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -281,6 +296,7 @@ export interface FileRoutesByTo {
   '/projects': typeof ProjectsIndexRoute
   '/services': typeof ServicesIndexRoute
   '/solutions': typeof SolutionsIndexRoute
+  '/videos': typeof VideosIndexRoute
   '/admin/company': typeof AdminAuthenticatedCompanyRoute
   '/admin/dashboard': typeof AdminAuthenticatedDashboardRoute
   '/admin/pages': typeof AdminAuthenticatedPagesRoute
@@ -301,6 +317,7 @@ export interface FileRoutesByTo {
   '/admin/projects': typeof AdminAuthenticatedProjectsIndexRoute
   '/admin/services': typeof AdminAuthenticatedServicesIndexRoute
   '/admin/solutions': typeof AdminAuthenticatedSolutionsIndexRoute
+  '/admin/videos': typeof AdminAuthenticatedVideosIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -318,6 +335,7 @@ export interface FileRoutesById {
   '/projects/': typeof ProjectsIndexRoute
   '/services/': typeof ServicesIndexRoute
   '/solutions/': typeof SolutionsIndexRoute
+  '/videos/': typeof VideosIndexRoute
   '/admin/_authenticated/company': typeof AdminAuthenticatedCompanyRoute
   '/admin/_authenticated/dashboard': typeof AdminAuthenticatedDashboardRoute
   '/admin/_authenticated/pages': typeof AdminAuthenticatedPagesRoute
@@ -338,6 +356,7 @@ export interface FileRoutesById {
   '/admin/_authenticated/projects/': typeof AdminAuthenticatedProjectsIndexRoute
   '/admin/_authenticated/services/': typeof AdminAuthenticatedServicesIndexRoute
   '/admin/_authenticated/solutions/': typeof AdminAuthenticatedSolutionsIndexRoute
+  '/admin/_authenticated/videos/': typeof AdminAuthenticatedVideosIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -355,6 +374,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/services/'
     | '/solutions/'
+    | '/videos/'
     | '/admin/company'
     | '/admin/dashboard'
     | '/admin/pages'
@@ -375,6 +395,7 @@ export interface FileRouteTypes {
     | '/admin/projects/'
     | '/admin/services/'
     | '/admin/solutions/'
+    | '/admin/videos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -389,6 +410,7 @@ export interface FileRouteTypes {
     | '/projects'
     | '/services'
     | '/solutions'
+    | '/videos'
     | '/admin/company'
     | '/admin/dashboard'
     | '/admin/pages'
@@ -409,6 +431,7 @@ export interface FileRouteTypes {
     | '/admin/projects'
     | '/admin/services'
     | '/admin/solutions'
+    | '/admin/videos'
   id:
     | '__root__'
     | '/'
@@ -425,6 +448,7 @@ export interface FileRouteTypes {
     | '/projects/'
     | '/services/'
     | '/solutions/'
+    | '/videos/'
     | '/admin/_authenticated/company'
     | '/admin/_authenticated/dashboard'
     | '/admin/_authenticated/pages'
@@ -445,6 +469,7 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/projects/'
     | '/admin/_authenticated/services/'
     | '/admin/_authenticated/solutions/'
+    | '/admin/_authenticated/videos/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -459,6 +484,7 @@ export interface RootRouteChildren {
   ProjectsIndexRoute: typeof ProjectsIndexRoute
   ServicesIndexRoute: typeof ServicesIndexRoute
   SolutionsIndexRoute: typeof SolutionsIndexRoute
+  VideosIndexRoute: typeof VideosIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -559,6 +585,13 @@ declare module '@tanstack/react-router' {
       path: '/solutions/$slug'
       fullPath: '/solutions/$slug'
       preLoaderRoute: typeof SolutionsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/videos/': {
+      id: '/videos/'
+      path: '/videos'
+      fullPath: '/videos/'
+      preLoaderRoute: typeof VideosIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin/_authenticated/company': {
@@ -701,6 +734,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedSolutionsNewRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/videos/': {
+      id: '/admin/_authenticated/videos/'
+      path: '/videos'
+      fullPath: '/admin/videos/'
+      preLoaderRoute: typeof AdminAuthenticatedVideosIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
   }
 }
 
@@ -725,6 +765,7 @@ interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedProjectsIndexRoute: typeof AdminAuthenticatedProjectsIndexRoute
   AdminAuthenticatedServicesIndexRoute: typeof AdminAuthenticatedServicesIndexRoute
   AdminAuthenticatedSolutionsIndexRoute: typeof AdminAuthenticatedSolutionsIndexRoute
+  AdminAuthenticatedVideosIndexRoute: typeof AdminAuthenticatedVideosIndexRoute
 }
 
 const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
@@ -748,6 +789,7 @@ const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedProjectsIndexRoute: AdminAuthenticatedProjectsIndexRoute,
   AdminAuthenticatedServicesIndexRoute: AdminAuthenticatedServicesIndexRoute,
   AdminAuthenticatedSolutionsIndexRoute: AdminAuthenticatedSolutionsIndexRoute,
+  AdminAuthenticatedVideosIndexRoute: AdminAuthenticatedVideosIndexRoute,
 }
 
 const AdminAuthenticatedRouteWithChildren =
@@ -781,6 +823,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProjectsIndexRoute: ProjectsIndexRoute,
   ServicesIndexRoute: ServicesIndexRoute,
   SolutionsIndexRoute: SolutionsIndexRoute,
+  VideosIndexRoute: VideosIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

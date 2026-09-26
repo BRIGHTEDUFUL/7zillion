@@ -56,7 +56,7 @@ function AboutPage() {
               alt="Seven Zillions beverage packaging machinery factory"
             />
             <div className="experience">
-              <strong>20+</strong>
+              <strong>10</strong>
               <span>
                 years of
                 <br />
