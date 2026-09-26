@@ -68,9 +68,23 @@ function CompanyFields() {
             label="WhatsApp number"
             placeholder="+233…"
           />
+          <TextField
+            control={form.control}
+            name="site"
+            label="Website"
+            required
+            placeholder="www.sevenzillions.com"
+          />
           <TextField control={form.control} name="city" label="City" />
         </div>
         <TextareaField control={form.control} name="address" label="Address" rows={3} />
+        <TextareaField
+          control={form.control}
+          name="whatsappMessage"
+          label="WhatsApp opener"
+          rows={2}
+          description="Pre-filled into every WhatsApp link when the visitor opens the chat."
+        />
         <DynamicList
           label="Phone numbers"
           description="Use the move buttons to set the display order."

@@ -1,5 +1,6 @@
-import { company } from "@/data/site";
 import { type FormEvent, type FormEventHandler, useRef } from "react";
+
+import { useSiteCompany } from "@/hooks/use-site-company";
 
 type Fields = {
   name?: string;
@@ -28,6 +29,7 @@ function read(form: HTMLFormElement): Fields {
  * can tell the visitor what just happened instead of leaving a dead button.
  */
 export function useComposeMail(onComposed?: () => void): FormEventHandler<HTMLFormElement> {
+  const { email } = useSiteCompany();
   const composedRef = useRef(onComposed);
   composedRef.current = onComposed;
 
@@ -49,6 +51,6 @@ export function useComposeMail(onComposed?: () => void): FormEventHandler<HTMLFo
     const body = encodeURIComponent(lines.join("\n"));
 
     composedRef.current?.();
-    window.location.href = `mailto:${company.email}?subject=${subject}&body=${body}`;
+    window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
   };
 }

@@ -52,6 +52,11 @@ export default defineSchema({
     data: v.string(), // JSON array of Service objects
   }),
 
+  // ── Singleton: editable page copy (/about + /contact checklist) ─────────
+  pages: defineTable({
+    data: v.string(), // JSON blob of PagesContent
+  }),
+
   // ── Activity log ─────────────────────────────────────────────────────────
   activityLog: defineTable({
     eventType: v.string(),

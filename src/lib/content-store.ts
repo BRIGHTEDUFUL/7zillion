@@ -6,6 +6,7 @@ import type {
   EventType,
   Insight,
   Package,
+  PagesContent,
   Product,
   Project,
   Service,
@@ -65,6 +66,10 @@ export interface ContentStore {
 
   getServices(): Promise<Service[]>;
   setServices(services: Service[]): Promise<void>;
+
+  /** null when the deployment has never saved page copy. */
+  getPages(): Promise<PagesContent | null>;
+  setPages(pages: PagesContent): Promise<void>;
 
   appendActivity(entry: ActivityLogEntry | ActivityEntryInput): Promise<void>;
   queryActivity(opts?: ActivityQueryOptions): Promise<ActivityLogEntry[]>;
@@ -298,6 +303,18 @@ export class ConvexContentStore implements ContentStore {
     await convexInternalMutation(this.url, "content:setServices", {
       data: JSON.stringify(services),
     });
+  }
+
+  // ── Page copy ───────────────────────────────────────────────────────────
+
+  async getPages(): Promise<PagesContent | null> {
+    const raw = (await convexQuery(this.url, "content:getPages")) as string | null;
+    if (!raw) return null;
+    return parseJson<PagesContent>(raw, "pages");
+  }
+
+  async setPages(pages: PagesContent): Promise<void> {
+    await convexInternalMutation(this.url, "content:setPages", { data: JSON.stringify(pages) });
   }
 
   // ── Activity log ─────────────────────────────────────────────────────────

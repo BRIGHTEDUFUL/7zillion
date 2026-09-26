@@ -1523,6 +1523,71 @@ p {
   border: 1px solid var(--border);
 }
 
+/* ---------- About: equipment range & production lines ---------- */
+.range-grid {
+  margin-top: 34px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+.range-card {
+  padding: 28px 26px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--primary);
+}
+.range-card h3 {
+  margin: 0 0 18px;
+  font-size: 17px;
+  line-height: 1.3;
+}
+.range-card ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 11px;
+}
+.range-card li {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  color: var(--muted-foreground);
+  font-size: 14px;
+  line-height: 1.55;
+}
+.range-card li svg {
+  flex: none;
+  margin-top: 3px;
+  color: var(--primary);
+}
+
+.line-groups {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+}
+.line-group {
+  padding: 34px;
+  background: var(--tint);
+  border: 1px solid var(--border);
+  border-top: 4px solid var(--primary);
+}
+.line-group h3 {
+  margin: 0 0 8px;
+  font-size: 21px;
+  line-height: 1.3;
+}
+.line-group > p {
+  margin: 0 0 22px;
+  color: var(--muted-foreground);
+  font-size: 14.5px;
+  line-height: 1.7;
+}
+.line-group .check-list li {
+  font-size: 14.5px;
+}
+
 .article-list {
   display: grid;
 }
@@ -1654,6 +1719,14 @@ p {
   color: var(--muted-foreground);
   font-size: 13px;
 }
+/* All three lines stacked under one phone glyph — the promise is stated once
+   instead of being repeated next to every number. */
+.contact-list .phone-stack {
+  display: grid;
+  gap: 6px;
+  font-size: 15.5px;
+  font-weight: 700;
+}
 .quote-form--page {
   border-top: 4px solid var(--primary);
 }
@@ -1692,6 +1765,16 @@ p {
 }
 .inner-cta .primary-button:hover {
   background: var(--lilac);
+}
+.inner-cta-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+.inner-cta-actions .primary-button,
+.inner-cta-actions .whatsapp-button {
+  flex: none;
 }
 
 /* ---------- Interaction polish ---------- */
@@ -2058,6 +2141,9 @@ html.is-ready .inner-intro {
     grid-template-columns: minmax(0, 1fr) 310px;
     gap: 40px;
   }
+  .range-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
   .footer-grid {
     grid-template-columns: 1.3fr 1fr 1fr;
   }
@@ -2163,7 +2249,8 @@ html.is-ready .inner-intro {
     grid-template-columns: 1fr;
     gap: 40px;
   }
-  .packages-grid {
+  .packages-grid,
+  .line-groups {
     grid-template-columns: 1fr;
   }
   .inner-cta-row {
@@ -2390,7 +2477,8 @@ html.is-ready .inner-intro {
     font-size: 15.5px;
   }
   .card-grid,
-  .service-grid {
+  .service-grid,
+  .range-grid {
     grid-template-columns: 1fr;
   }
   .detail-media img {
@@ -2402,6 +2490,7 @@ html.is-ready .inner-intro {
   .spec-panel,
   .note-panel,
   .package-card,
+  .line-group,
   .extra-lines {
     padding: 24px 20px;
   }
@@ -2719,6 +2808,13 @@ html.is-ready .inner-intro {
 .whatsapp-button:hover {
   background: #1ebe5d;
   transform: translateY(-2px);
+}
+
+/* Contact page: the same CTA, sized to its content rather than a full bar */
+.contact-whatsapp {
+  display: inline-flex;
+  width: fit-content;
+  margin-bottom: 30px;
 }
 
 /* Email CTA inside enquiry panel */

@@ -12,7 +12,6 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-import { getCompanyFn } from "@/api/company";
 import { listProductsFn } from "@/api/products";
 import { listSolutionsFn } from "@/api/solutions";
 import { listPackagesFn } from "@/api/packages";
@@ -20,12 +19,14 @@ import { listProjectsFn } from "@/api/projects";
 import { listInsightsFn } from "@/api/insights";
 import { recordActivityFn } from "@/api/activity";
 import { ContactRail } from "@/components/contact-rail";
+import { WhatsAppIcon } from "@/components/icons";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { useSectionReveal } from "@/hooks/use-site-effects";
 import { useComposeMail } from "@/hooks/use-compose-mail";
-import { company as staticCompany, customers } from "@/data/site";
+import { useSiteCompany } from "@/hooks/use-site-company";
+import { customers, telHref, waHref } from "@/data/site";
 
 import aboutImage from "@/assets/brand/about.jpg";
 import heroConvertingImage from "@/assets/brand/hero-converting.webp";
@@ -38,8 +39,8 @@ import supportTwoImage from "@/assets/brand/support2.jpg";
 
 export const Route = createFileRoute("/")({
   loader: async () => {
-    const [company, products, solutions, packages, projects, insights] = await Promise.all([
-      getCompanyFn(),
+    // Company details come from the root route's record (SiteCompanyProvider).
+    const [products, solutions, packages, projects, insights] = await Promise.all([
       listProductsFn(),
       listSolutionsFn(),
       listPackagesFn(),
@@ -49,7 +50,7 @@ export const Route = createFileRoute("/")({
     void recordActivityFn({
       data: { eventType: "page_view", path: "/", timestamp: new Date().toISOString() },
     });
-    return { company, products, solutions, packages, projects, insights };
+    return { products, solutions, packages, projects, insights };
   },
   head: () => ({
     meta: [
@@ -117,7 +118,8 @@ const SUPPORT_CARDS = [
 ];
 
 function HomePage() {
-  const { company, products, solutions, packages, projects, insights } = Route.useLoaderData();
+  const { products, solutions, packages, projects, insights } = Route.useLoaderData();
+  const company = useSiteCompany();
 
   const [slide, setSlide] = useState(0);
   const [cycle, setCycle] = useState(0);
@@ -570,15 +572,19 @@ function HomePage() {
               </span>
               {company.phones.map((phone) => (
                 <span key={phone}>
-                  <Phone /> <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
+                  <Phone />{" "}
+                  <a href={telHref(phone)} aria-label={`Call ${phone}`}>
+                    {phone}
+                  </a>
                 </span>
               ))}
               <span>
-                <MessageSquareText />{" "}
+                <WhatsAppIcon />{" "}
                 <a
-                  href={company.whatsappHref}
+                  href={waHref(company.whatsappMessage, company.whatsappHref)}
                   target="_blank"
                   rel="noreferrer"
+                  aria-label={`Chat with us on WhatsApp — ${company.whatsapp}`}
                   onClick={() =>
                     void recordActivityFn({
                       data: {

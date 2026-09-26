@@ -2,6 +2,7 @@ import {
   Building2,
   ExternalLink,
   Factory,
+  FileText,
   Gauge,
   KeyRound,
   LayoutDashboard,
@@ -18,6 +19,7 @@ import { cn } from "@/lib/utils";
 const workspaceNavigation = [
   { to: "/admin/dashboard", label: "Dashboard", icon: LayoutDashboard, exact: true },
   { to: "/admin/company", label: "Company", icon: Building2, exact: false },
+  { to: "/admin/pages", label: "Page content", icon: FileText, exact: false },
   { to: "/admin/products", label: "Products", icon: Factory, exact: false },
   { to: "/admin/solutions", label: "Solutions", icon: PanelsTopLeft, exact: false },
   { to: "/admin/packages", label: "Packages", icon: PackageOpen, exact: false },

@@ -12,7 +12,11 @@ import { type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import heroLineImage from "@/assets/brand/hero-line.webp";
+import { getCompanyFn } from "@/api/company";
+import { fallbackCompany } from "@/data/site";
+import { SiteCompanyProvider } from "@/components/site-company-provider";
 import { useEntranceGate } from "@/hooks/use-site-effects";
+import type { Company } from "@/types/content";
 
 function NotFoundComponent() {
   return (
@@ -84,6 +88,21 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
 }
 
 export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()({
+  /**
+   * One fetch of the admin-managed company record for the whole app. The
+   * footer, the contact rail and the CTA bars sit outside every page loader,
+   * so they read this through SiteCompanyProvider instead of the built-in
+   * copy — a saved phone number or WhatsApp link then shows up everywhere.
+   * A failed read still renders the built-in copy rather than the error page.
+   */
+  loader: async (): Promise<{ company: Company }> => {
+    try {
+      return { company: await getCompanyFn() };
+    } catch (error) {
+      console.error("Company record unavailable at the root route.", error);
+      return { company: fallbackCompany };
+    }
+  },
   head: () => ({
     meta: [
       { charSet: "utf-8" },
@@ -151,15 +170,18 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const { company } = Route.useLoaderData();
 
   // One entrance gate for the whole site: internal pages animate in the same
   // way as the home hero, and it never unmounts between routes.
   useEntranceGate();
 
   return (
-    <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
-    </QueryClientProvider>
+    <SiteCompanyProvider company={company}>
+      <QueryClientProvider client={queryClient}>
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </QueryClientProvider>
+    </SiteCompanyProvider>
   );
 }

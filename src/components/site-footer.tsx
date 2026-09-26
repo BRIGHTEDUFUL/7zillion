@@ -1,10 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Mail, MapPin, MessageSquareText, Phone } from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
 
 import { BrandLogo } from "@/components/logo";
-import { company, footerColumns } from "@/data/site";
+import { WhatsAppIcon } from "@/components/icons";
+import { footerColumns, telHref, waHref } from "@/data/site";
+import { useSiteCompany } from "@/hooks/use-site-company";
 
 export function SiteFooter() {
+  const company = useSiteCompany();
   return (
     <footer className="footer">
       <div className="shell footer-grid">
@@ -46,12 +49,20 @@ export function SiteFooter() {
           </p>
           {company.phones.map((phone) => (
             <p key={phone}>
-              <Phone size={16} /> <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
+              <Phone size={16} />{" "}
+              <a href={telHref(phone)} aria-label={`Call ${phone}`}>
+                {phone}
+              </a>
             </p>
           ))}
           <p>
-            <MessageSquareText size={16} />{" "}
-            <a href={company.whatsappHref} target="_blank" rel="noreferrer">
+            <WhatsAppIcon size={16} />{" "}
+            <a
+              href={waHref(company.whatsappMessage, company.whatsappHref)}
+              target="_blank"
+              rel="noreferrer"
+              aria-label={`Chat with us on WhatsApp — ${company.whatsapp}`}
+            >
               WhatsApp {company.whatsapp}
             </a>
           </p>

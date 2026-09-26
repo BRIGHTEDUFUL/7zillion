@@ -1,12 +1,14 @@
 import { Link, createFileRoute, notFound } from "@tanstack/react-router";
-import { ArrowRight, Check, MessageCircle, Mail, Phone } from "lucide-react";
+import { ArrowRight, Check, Mail, Phone } from "lucide-react";
 
 import { getProductFn, listProductsFn } from "@/api/products";
 import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
+import { WhatsAppIcon } from "@/components/icons";
 import { YouTubeEmbed } from "@/components/youtube-embed";
-import { company } from "@/data/site";
+import { telHref, waHref } from "@/data/site";
+import { useSiteCompany } from "@/hooks/use-site-company";
 
 export const Route = createFileRoute("/products/$slug")({
   loader: async ({ params }) => {
@@ -41,9 +43,10 @@ export const Route = createFileRoute("/products/$slug")({
 
 function ProductDetailPage() {
   const { product, all } = Route.useLoaderData();
+  const company = useSiteCompany();
 
-  // Build pre-filled WhatsApp URL
-  const waHref = `${company.whatsappHref}?text=${encodeURIComponent(product.whatsappMessage ?? "")}`;
+  // Pre-filled WhatsApp URL for this specific machine
+  const productWhatsappHref = waHref(product.whatsappMessage, company.whatsappHref);
 
   // Related: same category first, then fill with others, exclude self
   const related = all
@@ -121,7 +124,7 @@ function ProductDetailPage() {
 
             {/* WhatsApp — primary CTA, records whatsapp_click */}
             <a
-              href={waHref}
+              href={productWhatsappHref}
               target="_blank"
               rel="noreferrer"
               className="whatsapp-button"
@@ -137,7 +140,7 @@ function ProductDetailPage() {
                 })
               }
             >
-              <MessageCircle size={18} />
+              <WhatsAppIcon size={18} />
               WhatsApp us now
             </a>
 
@@ -152,7 +155,7 @@ function ProductDetailPage() {
               <Phone size={14} />
               <div>
                 {company.phones.slice(0, 2).map((phone) => (
-                  <a key={phone} href={`tel:${phone.replace(/\s+/g, "")}`}>
+                  <a key={phone} href={telHref(phone)} aria-label={`Call ${phone}`}>
                     {phone}
                   </a>
                 ))}

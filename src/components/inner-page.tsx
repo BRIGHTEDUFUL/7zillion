@@ -4,10 +4,12 @@ import type { ReactNode } from "react";
 
 import { Breadcrumbs, type Crumb } from "@/components/breadcrumbs";
 import { ContactRail } from "@/components/contact-rail";
+import { WhatsAppIcon } from "@/components/icons";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { useSectionReveal } from "@/hooks/use-site-effects";
-import { company } from "@/data/site";
+import { useSiteCompany } from "@/hooks/use-site-company";
+import { waHref } from "@/data/site";
 
 /**
  * Shared shell for every internal page: the same header, footer, motion and
@@ -32,6 +34,7 @@ export function InnerPage({
   children?: ReactNode;
 }) {
   useSectionReveal();
+  const company = useSiteCompany();
 
   return (
     <main id="top" className="inner-page hero-theme-dark">
@@ -59,9 +62,20 @@ export function InnerPage({
               <p className="eyebrow light">Ready to begin?</p>
               <h2>Plan your beverage production line with Seven Zillions</h2>
             </div>
-            <Link to="/contact" className="primary-button">
-              Get pricing & solutions <ArrowRight size={17} />
-            </Link>
+            <div className="inner-cta-actions">
+              <Link to="/contact" className="primary-button">
+                Get pricing & solutions <ArrowRight size={17} />
+              </Link>
+              <a
+                className="whatsapp-button"
+                href={waHref(company.whatsappMessage, company.whatsappHref)}
+                target="_blank"
+                rel="noreferrer"
+                aria-label="Chat with us on WhatsApp"
+              >
+                <WhatsAppIcon size={18} /> Chat on WhatsApp
+              </a>
+            </div>
           </div>
         </section>
       )}

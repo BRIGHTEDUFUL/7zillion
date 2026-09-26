@@ -1,21 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ArrowRight, Check, Mail, MapPin, MessageSquareText, Phone } from "lucide-react";
+import { ArrowRight, Check, Globe, Mail, MapPin, Phone } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { getCompanyFn } from "@/api/company";
+import { getPagesFn } from "@/api/pages";
 import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
+import { WhatsAppIcon } from "@/components/icons";
 import { SectionHeading } from "@/components/section-heading";
 import { useComposeMail } from "@/hooks/use-compose-mail";
-import { checklist } from "@/data/site";
+import { useSiteCompany } from "@/hooks/use-site-company";
+import { telHref, waHref } from "@/data/site";
 
 export const Route = createFileRoute("/contact/")({
   loader: async () => {
-    const company = await getCompanyFn();
+    // Company details come from the root route's record; the loader only
+    // fetches the editable "what to send us" list.
+    const pages = await getPagesFn();
     void recordActivityFn({
       data: { eventType: "page_view", path: "/contact", timestamp: new Date().toISOString() },
     });
-    return company;
+    return pages;
   },
   head: () => ({
     meta: [
@@ -31,7 +35,8 @@ export const Route = createFileRoute("/contact/")({
 });
 
 function ContactPage() {
-  const company = Route.useLoaderData();
+  const { contactChecklist } = Route.useLoaderData();
+  const company = useSiteCompany();
   const [sent, setSent] = useState(false);
   const composeMail = useComposeMail(() => setSent(true));
 
@@ -50,6 +55,16 @@ function ContactPage() {
       },
     });
     composeMail(event);
+  }
+
+  function trackWhatsapp() {
+    void recordActivityFn({
+      data: {
+        eventType: "whatsapp_click",
+        path: "/contact",
+        timestamp: new Date().toISOString(),
+      },
+    });
   }
 
   return (
@@ -75,39 +90,36 @@ function ContactPage() {
               <Mail size={18} />
               <div>
                 <strong>
-                  <a href={`mailto:${company.email}`}>{company.email}</a>
+                  <a href={`mailto:${company.email}`} aria-label={`Email ${company.email}`}>
+                    {company.email}
+                  </a>
                 </strong>
                 <span>Email</span>
               </div>
             </li>
-            {company.phones.map((phone) => (
-              <li key={phone}>
-                <Phone size={18} />
-                <div>
-                  <strong>
-                    <a href={`tel:${phone.replace(/\s+/g, "")}`}>{phone}</a>
-                  </strong>
-                  <span>{company.promise}</span>
-                </div>
-              </li>
-            ))}
             <li>
-              <MessageSquareText size={18} />
+              <Phone size={18} />
+              <div>
+                <div className="phone-stack">
+                  {company.phones.map((phone) => (
+                    <a key={phone} href={telHref(phone)} aria-label={`Call ${phone}`}>
+                      {phone}
+                    </a>
+                  ))}
+                </div>
+                <span>{company.promise}</span>
+              </div>
+            </li>
+            <li>
+              <WhatsAppIcon size={18} />
               <div>
                 <strong>
                   <a
-                    href={company.whatsappHref}
+                    href={waHref(company.whatsappMessage, company.whatsappHref)}
                     target="_blank"
                     rel="noreferrer"
-                    onClick={() =>
-                      void recordActivityFn({
-                        data: {
-                          eventType: "whatsapp_click",
-                          path: "/contact",
-                          timestamp: new Date().toISOString(),
-                        },
-                      })
-                    }
+                    aria-label={`Chat with us on WhatsApp — ${company.whatsapp}`}
+                    onClick={trackWhatsapp}
                   >
                     {company.whatsapp}
                   </a>
@@ -115,7 +127,35 @@ function ContactPage() {
                 <span>WhatsApp</span>
               </div>
             </li>
+            {company.site ? (
+              <li>
+                <Globe size={18} />
+                <div>
+                  <strong>
+                    <a
+                      href={`https://${company.site}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      aria-label={`Visit ${company.site}`}
+                    >
+                      {company.site}
+                    </a>
+                  </strong>
+                  <span>Website</span>
+                </div>
+              </li>
+            ) : null}
           </ul>
+
+          <a
+            className="whatsapp-button contact-whatsapp"
+            href={waHref(company.whatsappMessage, company.whatsappHref)}
+            target="_blank"
+            rel="noreferrer"
+            onClick={trackWhatsapp}
+          >
+            <WhatsAppIcon size={18} /> Chat with us on WhatsApp
+          </a>
 
           <div className="note-panel note-panel--violet">
             <h3>What to send us</h3>
@@ -124,7 +164,7 @@ function ContactPage() {
               production plan.
             </p>
             <ul className="check-list">
-              {checklist.map((line) => (
+              {contactChecklist.map((line) => (
                 <li key={line}>
                   <span>
                     <Check size={14} />

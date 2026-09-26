@@ -1,4 +1,12 @@
-import type { Insight, Package, Product, Solution, SpecEntry } from "@/types/content";
+import type {
+  Company,
+  Insight,
+  Package,
+  PagesContent,
+  Product,
+  Solution,
+  SpecEntry,
+} from "@/types/content";
 export type {
   Company,
   EventType,
@@ -57,6 +65,45 @@ export const company = {
   promise: "On-Time Delivery",
   founded: "20+ years of packaging engineering",
 } as const;
+
+/**
+ * Contact link builders — the numbers above are stored for reading and used
+ * everywhere else as real destinations.
+ *
+ *   telHref  "+233 554 602 103" → "tel:+233554602103" (E.164, no spaces, so
+ *            mobile diallers and desktop handlers both resolve it)
+ *   waHref   wa.me deep link carrying a pre-filled message, so the first chat
+ *            already states what the project is about. Pass the admin-managed
+ *            href when the page reads the company record from Convex.
+ */
+export const telHref = (phone: string) => `tel:${phone.replace(/[^\d+]/g, "")}`;
+
+export const whatsappMessage =
+  "Hello Seven Zillions, I would like to discuss a production line. Please send me more information.";
+
+export const waHref = (message?: string, href: string = company.whatsappHref) =>
+  message ? `${href}?text=${encodeURIComponent(message)}` : href;
+
+/**
+ * The copy above, typed for the shared Company record. This is what the public
+ * site renders when the Convex record is unreachable or has not been seeded —
+ * never a blank footer, never a broken contact block.
+ */
+export const fallbackCompany: Company = {
+  name: company.name,
+  tagline: company.tagline,
+  slogan: company.slogan,
+  site: company.site,
+  email: company.email,
+  address: company.address,
+  city: company.city,
+  phones: [...company.phones],
+  whatsapp: company.whatsapp,
+  whatsappHref: company.whatsappHref,
+  whatsappMessage,
+  promise: company.promise,
+  founded: company.founded,
+};
 
 export const navLinks = [
   { label: "Products", to: "/products" },
@@ -746,17 +793,133 @@ export const faqs = [
 
 export const about = {
   image: aboutImage,
-  lead: "Seven Zillions designs and builds industrial facilities, cleanrooms and high-tech manufacturing sites — and delivers the engineering, technical services and equipment that make them run.",
+  lead: "Seven Zillions designs and builds complex industrial facilities — cleanrooms, high-tech manufacturing production sites and full production campuses — and supplies the engineering, technical services and equipment that keep them producing.",
   paragraphs: [
-    "We manage large-scale industrial facility construction, plant design and the implementation of lean manufacturing production lines, and we supply automation controls, integration services and industrial systems that optimise factory production. For investors, that extends to business proposal and contract work, due diligence and factory operational optimisation.",
+    "We manage large-scale industrial facility construction and plant design, implement lean manufacturing production lines, and supply the automation controls, integration services and industrial systems that optimise factory production. Building, line and controls are engineered as one A–Z scope, so nothing is handed over as somebody else's problem.",
+    "For investors and promoters we carry the commercial work as well: business proposals and contract writing, due diligence and factory operational optimisation — the work that decides whether a plant is bankable before the first machine is ordered.",
     "For beverage producers we are the comprehensive partner in water and beverage manufacturing. Whether you need to upgrade a single component, arrange ongoing maintenance, or build a complete production line, we supply it — single spare parts, installation, maintenance and full engineering for individual projects or entire production lines.",
   ],
   points: [
-    "A–Z line layout and utility planning",
-    "Factory testing and documented commissioning",
-    "Installation, training and spare-parts support",
+    "Industrial facility construction and plant design",
+    "Cleanrooms and high-tech manufacturing sites",
+    "Lean production line implementation",
+    "Automation controls and systems integration",
+    "Proposals, contracts and due diligence for investors",
+    "Factory operational optimisation",
   ],
 } as const;
+
+/** Equipment & product range — grouped the way the catalogue is actually used. */
+export const equipmentRange = [
+  {
+    title: "Filling machines",
+    items: [
+      "Bottle filling machines",
+      "Water filling machines",
+      "Juice filling machines",
+      "Milk bottle filling machines",
+    ],
+  },
+  {
+    title: "Processing systems",
+    items: [
+      "Water treatment systems",
+      "Reverse osmosis water treatment equipment",
+      "Beverage processing systems",
+    ],
+  },
+  {
+    title: "Packaging & labeling",
+    items: [
+      "OPP labeling machines",
+      "Labeling machines",
+      "Packaging machines",
+      "Automatic palletising machines",
+    ],
+  },
+  {
+    title: "Bottle manufacturing & handling",
+    items: ["Blow molding machines", "Shrink packs", "Bottle conveyor machines"],
+  },
+] as const;
+
+/**
+ * Complete production line solutions. The beverage lines carry photography and
+ * their own pages; everything after them is delivered on the same engineering
+ * scope but is carried here as text only.
+ */
+export const productionLineGroups = [
+  {
+    title: "Beverage lines",
+    copy: "Water, juice, carbonated and canned drinks — treatment, blowing, filling, labeling, coding and packing.",
+    items: [
+      "Sachet water production line",
+      "Water filling production line",
+      "Juice filling production line",
+      "CSD (carbonated soft drink) filling production line",
+      "Cans filling production line",
+      "Bottled water & beverage production line",
+      "3–5 gallon water production line",
+      "Bottle blowing production line",
+    ],
+  },
+  {
+    title: "Industrial & processing lines",
+    copy: "Plant and packaging lines outside beverage, engineered, installed and commissioned to the same scope.",
+    items: [
+      "Cement production line",
+      "Sanitary pad & panty liner production line",
+      "Pyrolysis production line",
+      "Pharmaceutical production line",
+      "AGRO fertiliser production line",
+      "Tomato ketchup & paste production line",
+      "Cocoa chocolate production line",
+      "Biscuit production line",
+      "Starch production line",
+      "All types of powder & liquid packaging machine",
+    ],
+  },
+] as const;
+
+/** Lifecycle support — what stays with the client after handover. */
+export const supportLines = [
+  "Single spare parts supply, so a stopped machine goes back into production quickly",
+  "Installation and setup at your site, including civil guidance and steel platforms",
+  "Ongoing maintenance and support across the lifecycle of the equipment",
+  "Custom single-project engineering around your floor space and destination voltage",
+  "Complete production line development, from process flow to commissioning and training",
+] as const;
+
+/**
+ * Built-in page copy — the seed the admin panel starts from and the fallback
+ * the public pages render when nothing has been saved yet (Admin → Page
+ * content).
+ */
+export const defaultPages: PagesContent = {
+  about: {
+    heroTitle: "Cooperation and Interdependence",
+    heroIntro:
+      "We design and build industrial facilities, cleanrooms and high-tech manufacturing production sites — and supply the engineering, technical services and equipment that make them run.",
+    heading: "One partner for the building, the line and the equipment",
+    lead: about.lead,
+    paragraphs: [...about.paragraphs],
+    points: [...about.points],
+    image: "",
+    equipmentRange: equipmentRange.map((group) => ({
+      title: group.title,
+      items: [...group.items],
+    })),
+    productionLineGroups: productionLineGroups.map((group) => ({
+      title: group.title,
+      copy: group.copy,
+      items: [...group.items],
+    })),
+    supportLines: [...supportLines],
+    closingBrief:
+      "Tell us about your current production line, or submit your project file, container type, capacity and target market. Our expert engineering team will review your requirements and prepare a practical, customised line proposal designed to maximise your efficiency and meet your business goals.",
+  },
+  contactChecklist: [...checklist],
+};
 
 export const customers = [
   "Ghana",

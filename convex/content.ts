@@ -311,6 +311,30 @@ export const setServices = internalMutation({
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
+// Pages (singleton — editable copy for /about and /contact)
+// ──────────────────────────────────────────────────────────────────────────────
+
+export const getPages = query({
+  args: {},
+  handler: async (ctx) => {
+    const row = await ctx.db.query("pages").first();
+    return row?.data ?? null;
+  },
+});
+
+export const setPages = internalMutation({
+  args: { data: v.string() },
+  handler: async (ctx, { data }) => {
+    const existing = await ctx.db.query("pages").first();
+    if (existing) {
+      await ctx.db.patch(existing._id, { data });
+    } else {
+      await ctx.db.insert("pages", { data });
+    }
+  },
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
 // Activity log
 // ──────────────────────────────────────────────────────────────────────────────
 

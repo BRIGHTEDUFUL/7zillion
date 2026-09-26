@@ -48,14 +48,57 @@ export const CompanySchema = z
     name: requiredText,
     tagline: z.string(),
     slogan: z.string(),
+    site: requiredText,
     email,
     address: z.string(),
     city: z.string(),
     phones: z.array(z.string()),
     whatsapp: z.string(),
     whatsappHref: url,
+    whatsappMessage: z.string(),
     promise: z.string(),
     founded: z.string(),
+  })
+  .strict();
+
+/**
+ * Page copy. Headings are required so a save can never blank a section; list
+ * items stay free-form strings because they are trimmed and stripped of blanks
+ * on the server (see sanitizePages) — DynamicList has no field-level error slot.
+ */
+export const ContentGroupSchema = z
+  .object({
+    title: requiredText,
+    items: z.array(z.string()),
+  })
+  .strict();
+
+export const ProductionLineGroupSchema = z
+  .object({
+    title: requiredText,
+    copy: z.string(),
+    items: z.array(z.string()),
+  })
+  .strict();
+
+export const PagesSchema = z
+  .object({
+    about: z
+      .object({
+        heroTitle: requiredText,
+        heroIntro: requiredText,
+        heading: requiredText,
+        lead: requiredText,
+        paragraphs: z.array(z.string()),
+        points: z.array(z.string()),
+        image: z.string(),
+        equipmentRange: z.array(ContentGroupSchema),
+        productionLineGroups: z.array(ProductionLineGroupSchema),
+        supportLines: z.array(z.string()),
+        closingBrief: requiredText,
+      })
+      .strict(),
+    contactChecklist: z.array(z.string()),
   })
   .strict();
 
@@ -208,6 +251,7 @@ export const ActivityQueryOptionsSchema = z
   .strict();
 
 export type CompanyInput = z.infer<typeof CompanySchema>;
+export type PagesInput = z.infer<typeof PagesSchema>;
 export type ProductInput = z.infer<typeof ProductSchema>;
 export type SolutionInput = z.infer<typeof SolutionSchema>;
 export type PackageInput = z.infer<typeof PackageSchema>;

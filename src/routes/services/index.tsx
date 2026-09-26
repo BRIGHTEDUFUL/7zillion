@@ -5,7 +5,7 @@ import { getServicesFn } from "@/api/services";
 import { recordActivityFn } from "@/api/activity";
 import { InnerPage } from "@/components/inner-page";
 import { SectionHeading } from "@/components/section-heading";
-import { acceptance, deliverySteps } from "@/data/site";
+import { acceptance, deliverySteps, services as defaultServices } from "@/data/site";
 
 export const Route = createFileRoute("/services/")({
   loader: async () => {
@@ -13,7 +13,9 @@ export const Route = createFileRoute("/services/")({
     void recordActivityFn({
       data: { eventType: "page_view", path: "/services", timestamp: new Date().toISOString() },
     });
-    return services;
+    // An unseeded deployment has no services yet — show the built-in list
+    // instead of an empty section.
+    return services.length ? services : defaultServices;
   },
   head: () => ({
     meta: [
