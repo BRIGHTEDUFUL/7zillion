@@ -1,6 +1,21 @@
+import { getRequestIP } from "@tanstack/react-start/server";
+
 import type { Env } from "@/lib/content-store";
 import { getContentStore } from "@/lib/content-store";
 import { DuplicateSlugError } from "@/lib/content-store";
+
+/**
+ * The caller's IP as the reverse proxy reports it — the same bucket the admin
+ * rate limiter uses. There is no request scope in unit callers, so those fall
+ * back to one shared bucket rather than an unbounded one.
+ */
+export function getClientIp(): string {
+  try {
+    return getRequestIP({ xForwardedFor: true }) ?? "unknown";
+  } catch {
+    return "unknown";
+  }
+}
 
 /**
  * With Convex + Node, there are no Cloudflare bindings.  The "env" is simply

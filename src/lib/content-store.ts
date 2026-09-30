@@ -1,5 +1,6 @@
 import "@tanstack/react-start/server-only";
 
+import { getConvexDeployKey, getConvexUrl } from "@/lib/convex-internal";
 import type {
   ActivityLogEntry,
   Company,
@@ -110,18 +111,6 @@ const VALID_EVENT_TYPES = new Set<string>([
   "contact_submission",
   "enquiry_submission",
 ]);
-
-function getConvexUrl(): string {
-  const url = (typeof process !== "undefined" && process.env["CONVEX_URL"]) || "";
-  if (!url) throw new Error("CONVEX_URL environment variable is not set.");
-  return url;
-}
-
-function getConvexDeployKey(): string {
-  const key = (typeof process !== "undefined" && process.env["CONVEX_DEPLOY_KEY"]) || "";
-  if (!key) throw new Error("CONVEX_DEPLOY_KEY environment variable is not set.");
-  return key;
-}
 
 /** Call a public Convex query (SSR loaders, public pages — no auth required). */
 async function convexQuery(

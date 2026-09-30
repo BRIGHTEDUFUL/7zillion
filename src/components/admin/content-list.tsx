@@ -31,6 +31,8 @@ interface ContentListProps<TItem> {
   onDelete?: (item: TItem) => void | Promise<void>;
   deleteDescription?: (item: TItem) => string;
   emptyMessage?: string;
+  /** Hint under an empty table; defaults to the "use the add action" line. */
+  emptyHint?: string;
   caption?: string;
 }
 
@@ -70,6 +72,7 @@ export function ContentList<TItem>({
   onDelete,
   deleteDescription,
   emptyMessage = "No items have been added yet.",
+  emptyHint = "Use the add action to create the first item.",
   caption,
 }: ContentListProps<TItem>) {
   const [sort, setSort] = useState<SortState>(null);
@@ -106,9 +109,7 @@ export function ContentList<TItem>({
           <Inbox className="size-6" aria-hidden="true" />
         </span>
         <p className="mt-4 font-semibold text-foreground">{emptyMessage}</p>
-        <p className="mt-1 text-sm text-muted-foreground">
-          Use the add action to create the first item.
-        </p>
+        <p className="mt-1 text-sm text-muted-foreground">{emptyHint}</p>
       </div>
     );
   }

@@ -31,6 +31,7 @@ import { Route as AdminAuthenticatedSettingsRouteImport } from './routes/admin/_
 import { Route as AdminAuthenticatedInsightsIndexRouteImport } from './routes/admin/_authenticated/insights/index'
 import { Route as AdminAuthenticatedInsightsSlugRouteImport } from './routes/admin/_authenticated/insights/$slug'
 import { Route as AdminAuthenticatedInsightsNewRouteImport } from './routes/admin/_authenticated/insights/new'
+import { Route as AdminAuthenticatedLeadsIndexRouteImport } from './routes/admin/_authenticated/leads/index'
 import { Route as AdminAuthenticatedPackagesIndexRouteImport } from './routes/admin/_authenticated/packages/index'
 import { Route as AdminAuthenticatedPackagesSlugRouteImport } from './routes/admin/_authenticated/packages/$slug'
 import { Route as AdminAuthenticatedPackagesNewRouteImport } from './routes/admin/_authenticated/packages/new'
@@ -161,6 +162,12 @@ const AdminAuthenticatedInsightsNewRoute =
     path: '/insights/new',
     getParentRoute: () => AdminAuthenticatedRoute,
   } as any)
+const AdminAuthenticatedLeadsIndexRoute =
+  AdminAuthenticatedLeadsIndexRouteImport.update({
+    id: '/leads/',
+    path: '/leads/',
+    getParentRoute: () => AdminAuthenticatedRoute,
+  } as any)
 const AdminAuthenticatedPackagesIndexRoute =
   AdminAuthenticatedPackagesIndexRouteImport.update({
     id: '/packages/',
@@ -276,6 +283,7 @@ export interface FileRoutesByFullPath {
   '/admin/solutions/$slug': typeof AdminAuthenticatedSolutionsSlugRoute
   '/admin/solutions/new': typeof AdminAuthenticatedSolutionsNewRoute
   '/admin/insights/': typeof AdminAuthenticatedInsightsIndexRoute
+  '/admin/leads/': typeof AdminAuthenticatedLeadsIndexRoute
   '/admin/packages/': typeof AdminAuthenticatedPackagesIndexRoute
   '/admin/products/': typeof AdminAuthenticatedProductsIndexRoute
   '/admin/projects/': typeof AdminAuthenticatedProjectsIndexRoute
@@ -312,6 +320,7 @@ export interface FileRoutesByTo {
   '/admin/solutions/$slug': typeof AdminAuthenticatedSolutionsSlugRoute
   '/admin/solutions/new': typeof AdminAuthenticatedSolutionsNewRoute
   '/admin/insights': typeof AdminAuthenticatedInsightsIndexRoute
+  '/admin/leads': typeof AdminAuthenticatedLeadsIndexRoute
   '/admin/packages': typeof AdminAuthenticatedPackagesIndexRoute
   '/admin/products': typeof AdminAuthenticatedProductsIndexRoute
   '/admin/projects': typeof AdminAuthenticatedProjectsIndexRoute
@@ -351,6 +360,7 @@ export interface FileRoutesById {
   '/admin/_authenticated/solutions/$slug': typeof AdminAuthenticatedSolutionsSlugRoute
   '/admin/_authenticated/solutions/new': typeof AdminAuthenticatedSolutionsNewRoute
   '/admin/_authenticated/insights/': typeof AdminAuthenticatedInsightsIndexRoute
+  '/admin/_authenticated/leads/': typeof AdminAuthenticatedLeadsIndexRoute
   '/admin/_authenticated/packages/': typeof AdminAuthenticatedPackagesIndexRoute
   '/admin/_authenticated/products/': typeof AdminAuthenticatedProductsIndexRoute
   '/admin/_authenticated/projects/': typeof AdminAuthenticatedProjectsIndexRoute
@@ -390,6 +400,7 @@ export interface FileRouteTypes {
     | '/admin/solutions/$slug'
     | '/admin/solutions/new'
     | '/admin/insights/'
+    | '/admin/leads/'
     | '/admin/packages/'
     | '/admin/products/'
     | '/admin/projects/'
@@ -426,6 +437,7 @@ export interface FileRouteTypes {
     | '/admin/solutions/$slug'
     | '/admin/solutions/new'
     | '/admin/insights'
+    | '/admin/leads'
     | '/admin/packages'
     | '/admin/products'
     | '/admin/projects'
@@ -464,6 +476,7 @@ export interface FileRouteTypes {
     | '/admin/_authenticated/solutions/$slug'
     | '/admin/_authenticated/solutions/new'
     | '/admin/_authenticated/insights/'
+    | '/admin/_authenticated/leads/'
     | '/admin/_authenticated/packages/'
     | '/admin/_authenticated/products/'
     | '/admin/_authenticated/projects/'
@@ -643,6 +656,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAuthenticatedInsightsNewRouteImport
       parentRoute: typeof AdminAuthenticatedRoute
     }
+    '/admin/_authenticated/leads/': {
+      id: '/admin/_authenticated/leads/'
+      path: '/leads'
+      fullPath: '/admin/leads/'
+      preLoaderRoute: typeof AdminAuthenticatedLeadsIndexRouteImport
+      parentRoute: typeof AdminAuthenticatedRoute
+    }
     '/admin/_authenticated/packages/': {
       id: '/admin/_authenticated/packages/'
       path: '/packages'
@@ -760,6 +780,7 @@ interface AdminAuthenticatedRouteChildren {
   AdminAuthenticatedSolutionsSlugRoute: typeof AdminAuthenticatedSolutionsSlugRoute
   AdminAuthenticatedSolutionsNewRoute: typeof AdminAuthenticatedSolutionsNewRoute
   AdminAuthenticatedInsightsIndexRoute: typeof AdminAuthenticatedInsightsIndexRoute
+  AdminAuthenticatedLeadsIndexRoute: typeof AdminAuthenticatedLeadsIndexRoute
   AdminAuthenticatedPackagesIndexRoute: typeof AdminAuthenticatedPackagesIndexRoute
   AdminAuthenticatedProductsIndexRoute: typeof AdminAuthenticatedProductsIndexRoute
   AdminAuthenticatedProjectsIndexRoute: typeof AdminAuthenticatedProjectsIndexRoute
@@ -784,6 +805,7 @@ const AdminAuthenticatedRouteChildren: AdminAuthenticatedRouteChildren = {
   AdminAuthenticatedSolutionsSlugRoute: AdminAuthenticatedSolutionsSlugRoute,
   AdminAuthenticatedSolutionsNewRoute: AdminAuthenticatedSolutionsNewRoute,
   AdminAuthenticatedInsightsIndexRoute: AdminAuthenticatedInsightsIndexRoute,
+  AdminAuthenticatedLeadsIndexRoute: AdminAuthenticatedLeadsIndexRoute,
   AdminAuthenticatedPackagesIndexRoute: AdminAuthenticatedPackagesIndexRoute,
   AdminAuthenticatedProductsIndexRoute: AdminAuthenticatedProductsIndexRoute,
   AdminAuthenticatedProjectsIndexRoute: AdminAuthenticatedProjectsIndexRoute,

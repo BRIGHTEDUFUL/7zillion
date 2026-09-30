@@ -50,6 +50,17 @@ Gate before any push: `npm run typecheck && npm run lint && npm test && npm run 
   `src/data/site.ts`), logging and falling back on error, so a missing row or an
   undeployed table never blanks a block. Blank rows from the list editors are
   dropped on save (`sanitizePages`, `sanitizeVideos` in `src/lib/site-content.ts`).
+- **Quote forms**: every submit sends two independent requests — from the
+  browser straight to Web3Forms (`src/lib/quote-submit.ts`, which emails the
+  team inbox; the public-by-design key comes from `VITE_WEB3FORMS_ACCESS_KEY`
+  at build time) and to `saveLeadFn`, which files a copy in the Convex `leads`
+  table shown in **Admin → Leads**. Storage is best-effort by design:
+  `src/hooks/use-quote-submit.ts` confirms when *either* channel lands
+  (`emailed || stored`), so a storage hiccup never fails a visitor whose email
+  arrived, and a honeypot drops bots from both. Leads are personal data, so
+  `convex/leads.ts` exposes only internal functions, reachable solely through
+  the authenticated server functions in `src/api/leads.ts`, and
+  `src/lib/lead-throttle.ts` caps writes per IP (5 / 10 min).
 - **Company record in the layout**: the root route loads it once per
   navigation and `SiteCompanyProvider` (`src/components/site-company-provider.tsx`)
   publishes it to the footer, contact rail, CTA bars and quote form through

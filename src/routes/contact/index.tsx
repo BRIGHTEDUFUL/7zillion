@@ -39,7 +39,7 @@ export const Route = createFileRoute("/contact/")({
 function ContactPage() {
   const { contactChecklist } = Route.useLoaderData();
   const company = useSiteCompany();
-  const { handleSubmit: sendQuote, status, reason, mailtoHref, reset } = useQuoteSubmit();
+  const { handleSubmit: sendQuote, status, reason, mailtoHref, reset } = useQuoteSubmit("/contact");
 
   useEffect(() => {
     if (status !== "sent" && status !== "composed") return;
@@ -217,7 +217,8 @@ function ContactPage() {
           </button>
           <QuoteStatus status={status} reason={reason} mailtoHref={mailtoHref} />
           <p className="form-note">
-            Your message is delivered to our team by email and used only to answer your enquiry.
+            Your message is emailed to our team and kept in our enquiry list. We use it only to
+            answer your enquiry.
           </p>
         </form>
       </section>

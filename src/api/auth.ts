@@ -1,11 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
-import {
-  deleteCookie,
-  getCookie,
-  getRequest,
-  getRequestIP,
-  setCookie,
-} from "@tanstack/react-start/server";
+import { deleteCookie, getCookie, getRequest, setCookie } from "@tanstack/react-start/server";
 
 import * as auth from "@/lib/auth";
 import {
@@ -18,23 +12,13 @@ import {
   type AuthResult,
 } from "@/lib/auth-contract";
 
-import { getApiEnv } from "./_internal";
+import { getApiEnv, getClientIp } from "./_internal";
 
 /**
  * Every function here resolves to the shared `AuthResult` shape: `{ ok: true }`
  * or `{ ok: false, code, message }`. The client shows `message` and branches on
  * `code` — no redirects, thrown Responses or error-string matching.
  */
-
-function getClientIp(): string {
-  try {
-    return getRequestIP({ xForwardedFor: true }) ?? "unknown";
-  } catch {
-    // Unit callers and non-request invocations do not always have a request
-    // event.  The auth service can still use a stable bucket for those calls.
-    return "unknown";
-  }
-}
 
 /**
  * The session cookie is `Secure` whenever the request actually arrived over

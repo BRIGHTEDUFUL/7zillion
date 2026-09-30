@@ -22,6 +22,7 @@ import {
   ServiceSchema,
   VideoSchema,
   DateStringSchema,
+  LeadInputSchema,
 } from "@/lib/schemas";
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -458,5 +459,69 @@ describe("VideoSchema", () => {
 
   it("rejects unknown keys", () => {
     expect(VideoSchema.safeParse({ ...validVideo, duration: "1:20" }).success).toBe(false);
+  });
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Leads — what the quote forms may hand the storage layer
+// ──────────────────────────────────────────────────────────────────────────────
+
+const validLead = {
+  name: "Kwame Mensah",
+  email: "kwame@example.com",
+  phone: "+233 554 602 103",
+  requirements: "500ml bottle line, 60 bpm, Accra.",
+  source: "/contact",
+  botcheck: "",
+};
+
+describe("LeadInputSchema", () => {
+  it("accepts what the quote forms submit, trimming the text fields", () => {
+    const parsed = LeadInputSchema.parse({ ...validLead, name: "  Kwame Mensah  " });
+
+    expect(parsed.name).toBe("Kwame Mensah");
+    expect(parsed.email).toBe("kwame@example.com");
+  });
+
+  it("accepts an enquiry with no phone number", () => {
+    expect(
+      LeadInputSchema.safeParse({
+        name: validLead.name,
+        email: validLead.email,
+        requirements: validLead.requirements,
+        source: validLead.source,
+        botcheck: validLead.botcheck,
+      }).success,
+    ).toBe(true);
+  });
+
+  it("rejects a blank required field", () => {
+    expect(LeadInputSchema.safeParse({ ...validLead, name: "" }).success).toBe(false);
+    expect(LeadInputSchema.safeParse({ ...validLead, requirements: "   " }).success).toBe(false);
+    expect(LeadInputSchema.safeParse({ ...validLead, email: "" }).success).toBe(false);
+  });
+
+  it("rejects a malformed email", () => {
+    expect(LeadInputSchema.safeParse({ ...validLead, email: "not-an-email" }).success).toBe(false);
+  });
+
+  it("accepts only the two quote forms as a source", () => {
+    expect(LeadInputSchema.safeParse({ ...validLead, source: "/" }).success).toBe(true);
+
+    for (const source of ["", "/blog", "https://evil.example"]) {
+      expect(LeadInputSchema.safeParse({ ...validLead, source }).success).toBe(false);
+    }
+  });
+
+  it("passes the honeypot through untouched so the server can drop it", () => {
+    // Whether empty or filled, the field has to validate: saveLeadFn discards
+    // a filled one, and answering "invalid submission" instead would tell the
+    // bot which field gave it away.
+    expect(LeadInputSchema.parse({ ...validLead, botcheck: "" }).botcheck).toBe("");
+    expect(LeadInputSchema.parse({ ...validLead, botcheck: "spam" }).botcheck).toBe("spam");
+  });
+
+  it("rejects unknown keys", () => {
+    expect(LeadInputSchema.safeParse({ ...validLead, ipAddress: "1.2.3.4" }).success).toBe(false);
   });
 });

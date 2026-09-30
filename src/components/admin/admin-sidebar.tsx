@@ -4,6 +4,7 @@ import {
   Factory,
   FileText,
   Gauge,
+  Inbox,
   KeyRound,
   LayoutDashboard,
   Lightbulb,
@@ -28,6 +29,7 @@ const workspaceNavigation = [
   { to: "/admin/videos", label: "Videos", icon: Video, exact: false },
   { to: "/admin/insights", label: "Insights", icon: Lightbulb, exact: false },
   { to: "/admin/services", label: "Services", icon: Wrench, exact: false },
+  { to: "/admin/leads", label: "Leads", icon: Inbox, exact: false },
 ] as const;
 
 const accountNavigation = [

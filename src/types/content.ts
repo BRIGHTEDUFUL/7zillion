@@ -149,3 +149,19 @@ export type ActivityLogEntry = {
   slug?: string | undefined;
   timestamp: string; // ISO 8601 UTC
 };
+
+export type LeadStatus = "new" | "contacted" | "closed";
+
+/** One quote-form enquiry as the admin panel receives it. */
+export type Lead = {
+  /** Stable identifier — Convex document _id (string). */
+  id: string;
+  name: string;
+  email: string;
+  phone?: string | undefined;
+  requirements: string;
+  /** Which form sent it: "/" (homepage) or "/contact". */
+  source: string;
+  status: LeadStatus;
+  receivedAt: string; // ISO 8601 UTC
+};

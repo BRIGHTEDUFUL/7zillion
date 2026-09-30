@@ -11,6 +11,7 @@
 import type * as auth from "../auth.js";
 import type * as content from "../content.js";
 import type * as files from "../files.js";
+import type * as leads from "../leads.js";
 
 import type {
   ApiFromModules,
@@ -22,6 +23,7 @@ declare const fullApi: ApiFromModules<{
   auth: typeof auth;
   content: typeof content;
   files: typeof files;
+  leads: typeof leads;
 }>;
 
 /**

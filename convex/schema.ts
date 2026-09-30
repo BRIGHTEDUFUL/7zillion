@@ -64,6 +64,22 @@ export default defineSchema({
     data: v.string(), // JSON array of Video objects
   }),
 
+  // ── Enquiries captured by the quote forms ───────────────────────────────
+  // Rows hold a visitor's name, email and phone, so nothing here is public:
+  // writes are internalMutation and `leads:list` is an internalQuery, both
+  // reachable only from the server functions in src/api/leads.ts. receivedAt
+  // is stamped inside the mutation so a skewed client clock cannot fake it.
+  leads: defineTable({
+    name: v.string(),
+    email: v.string(),
+    phone: v.optional(v.string()),
+    requirements: v.string(),
+    /** Which form sent it: "/" (homepage) or "/contact". */
+    source: v.string(),
+    status: v.union(v.literal("new"), v.literal("contacted"), v.literal("closed")),
+    receivedAt: v.string(), // ISO 8601 UTC
+  }).index("by_receivedAt", ["receivedAt"]),
+
   // ── Activity log ─────────────────────────────────────────────────────────
   activityLog: defineTable({
     eventType: v.string(),

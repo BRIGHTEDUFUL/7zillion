@@ -269,6 +269,45 @@ export const ActivityQueryOptionsSchema = z
   })
   .strict();
 
+// ── Leads (quote-form enquiries) ──────────────────────────────────────────────
+
+export const LeadStatusSchema = z.enum(["new", "contacted", "closed"]);
+
+/**
+ * What a quote form may hand the leads store. name / email / requirements are
+ * `required` in the form markup, phone is not. `botcheck` is the honeypot a
+ * person never fills in: it passes validation on purpose so the server can
+ * drop the submission without telling the bot which field gave it away.
+ */
+export const LeadInputSchema = z
+  .object({
+    name: z.string().trim().min(1, "Required").max(200, "Too long"),
+    email: email.max(320, "Too long"),
+    phone: z.string().trim().max(40, "Too long").optional(),
+    requirements: z.string().trim().min(1, "Required").max(5000, "Too long"),
+    source: z.enum(["/", "/contact"]),
+    botcheck: z.string().max(200).optional(),
+  })
+  .strict();
+
+/** A stored lead after mapping: Convex `_id` arrives as `id`. */
+export const LeadRecordSchema = z
+  .object({
+    id: z.string().min(1),
+    name: z.string(),
+    email: z.string(),
+    phone: z.string().optional(),
+    requirements: z.string(),
+    source: z.string(),
+    status: LeadStatusSchema,
+    receivedAt: z.string(),
+  })
+  .strict();
+
+export type LeadInput = z.infer<typeof LeadInputSchema>;
+/** Which form sent an enquiry: "/" (homepage) or "/contact". */
+export type LeadSource = LeadInput["source"];
+
 export type CompanyInput = z.infer<typeof CompanySchema>;
 export type PagesInput = z.infer<typeof PagesSchema>;
 export type ProductInput = z.infer<typeof ProductSchema>;
