@@ -1,13 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ArrowRight, Check, Globe, Mail, MapPin, Phone } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { getPagesFn } from "@/api/pages";
 import { recordActivityFn } from "@/api/activity";
+import { FormHoneypot } from "@/components/form-honeypot";
+import { QuoteStatus } from "@/components/quote-status";
 import { InnerPage } from "@/components/inner-page";
 import { WhatsAppIcon } from "@/components/icons";
 import { SectionHeading } from "@/components/section-heading";
-import { useComposeMail } from "@/hooks/use-compose-mail";
+import { useQuoteSubmit } from "@/hooks/use-quote-submit";
 import { useSiteCompany } from "@/hooks/use-site-company";
 import { telHref, waHref } from "@/data/site";
 
@@ -37,14 +39,13 @@ export const Route = createFileRoute("/contact/")({
 function ContactPage() {
   const { contactChecklist } = Route.useLoaderData();
   const company = useSiteCompany();
-  const [sent, setSent] = useState(false);
-  const composeMail = useComposeMail(() => setSent(true));
+  const { handleSubmit: sendQuote, status, reason, mailtoHref, reset } = useQuoteSubmit();
 
   useEffect(() => {
-    if (!sent) return;
-    const timer = window.setTimeout(() => setSent(false), 7000);
+    if (status !== "sent" && status !== "composed") return;
+    const timer = window.setTimeout(reset, 7000);
     return () => window.clearTimeout(timer);
-  }, [sent]);
+  }, [status, reset]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     void recordActivityFn({
@@ -54,7 +55,7 @@ function ContactPage() {
         timestamp: new Date().toISOString(),
       },
     });
-    composeMail(event);
+    void sendQuote(event);
   }
 
   function trackWhatsapp() {
@@ -204,18 +205,19 @@ function ContactPage() {
               required
             />
           </label>
-          <button type="submit" className="primary-button">
-            Send requirements <ArrowRight size={17} />
+          <FormHoneypot />
+          <button type="submit" className="primary-button" disabled={status === "sending"}>
+            {status === "sending" ? (
+              "Sending your requirements…"
+            ) : (
+              <>
+                Send requirements <ArrowRight size={17} />
+              </>
+            )}
           </button>
-          {sent && (
-            <p className="form-sent" role="status">
-              <Check size={16} />
-              Your email app is opening with your message ready to send.
-            </p>
-          )}
+          <QuoteStatus status={status} reason={reason} mailtoHref={mailtoHref} />
           <p className="form-note">
-            Your message opens in your email app addressed to {company.email} — no data is stored on
-            this site.
+            Your message is delivered to our team by email and used only to answer your enquiry.
           </p>
         </form>
       </section>

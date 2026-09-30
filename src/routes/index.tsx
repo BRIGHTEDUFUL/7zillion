@@ -20,13 +20,15 @@ import { listInsightsFn } from "@/api/insights";
 import { listVideosFn } from "@/api/videos";
 import { recordActivityFn } from "@/api/activity";
 import { ContactRail } from "@/components/contact-rail";
+import { FormHoneypot } from "@/components/form-honeypot";
+import { QuoteStatus } from "@/components/quote-status";
 import { WhatsAppIcon } from "@/components/icons";
 import { SectionHeading } from "@/components/section-heading";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { VideoGallery } from "@/components/video-gallery";
 import { useSectionReveal } from "@/hooks/use-site-effects";
-import { useComposeMail } from "@/hooks/use-compose-mail";
+import { useQuoteSubmit } from "@/hooks/use-quote-submit";
 import { useSiteCompany } from "@/hooks/use-site-company";
 import { customers, telHref, waHref } from "@/data/site";
 
@@ -131,18 +133,17 @@ function HomePage() {
   const pausedRef = useRef(false);
   const swipeRef = useRef<{ x: number; y: number } | null>(null);
   const heroRef = useRef<HTMLElement>(null);
-  const [sent, setSent] = useState(false);
-  const composeMail = useComposeMail(() => setSent(true));
+  const { handleSubmit: sendQuote, status, reason, mailtoHref, reset } = useQuoteSubmit();
   const theme = HERO_SLIDES[slide]?.theme ?? "light";
 
   useSectionReveal();
 
-  // The confirmation disappears on its own once the mail client has focus.
+  // The confirmation disappears on its own once the visitor has read it.
   useEffect(() => {
-    if (!sent) return;
-    const timer = window.setTimeout(() => setSent(false), 7000);
+    if (status !== "sent" && status !== "composed") return;
+    const timer = window.setTimeout(reset, 7000);
     return () => window.clearTimeout(timer);
-  }, [sent]);
+  }, [status, reset]);
 
   const goTo = useCallback((next: number) => {
     setSlide((next + HERO_SLIDES.length) % HERO_SLIDES.length);
@@ -191,7 +192,7 @@ function HomePage() {
         timestamp: new Date().toISOString(),
       },
     });
-    composeMail(event);
+    void sendQuote(event);
   }
 
   return (
@@ -642,15 +643,17 @@ function HomePage() {
                 required
               />
             </label>
-            <button type="submit" className="primary-button">
-              Get pricing & solutions <ArrowRight size={17} />
+            <FormHoneypot />
+            <button type="submit" className="primary-button" disabled={status === "sending"}>
+              {status === "sending" ? (
+                "Sending your requirements…"
+              ) : (
+                <>
+                  Get pricing & solutions <ArrowRight size={17} />
+                </>
+              )}
             </button>
-            {sent && (
-              <p className="form-sent" role="status">
-                <Check size={16} />
-                Your email app is opening with your message ready to send.
-              </p>
-            )}
+            <QuoteStatus status={status} reason={reason} mailtoHref={mailtoHref} />
           </form>
         </div>
       </section>

@@ -442,6 +442,13 @@ p {
 .primary-button:hover {
   background: var(--violet-700);
 }
+/* Submit is in flight: the button stays put instead of lifting on hover. */
+.primary-button:disabled {
+  background: var(--primary);
+  opacity: 0.7;
+  cursor: progress;
+  transform: none;
+}
 .hero .outline-button:hover {
   background: var(--primary);
   border-color: var(--primary);
@@ -933,6 +940,16 @@ p {
   color: var(--muted-foreground);
   font-size: 12.5px;
   line-height: 1.6;
+}
+/* Web3Forms honeypot: off-screen and out of the tab order, but still a field
+   a bot will fill in. Scoped so it beats the `.quote-form input` sizing. */
+.quote-form .form-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+  pointer-events: none;
 }
 
 /* ---------- Footer ---------- */
@@ -1913,6 +1930,25 @@ select:focus-visible {
 }
 .form-sent svg {
   flex: none;
+}
+
+/* Delivery failed — say so, and keep the visitor's text reachable through
+   their own mail client rather than losing the enquiry. */
+.form-error {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px;
+  margin: 0;
+  color: hsl(0 68% 42%);
+  font-size: 13.5px;
+  font-weight: 700;
+  animation: status-in 0.3s ease;
+}
+.form-error a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 /* YouTube facade — one thumbnail until the visitor asks for the video. */
