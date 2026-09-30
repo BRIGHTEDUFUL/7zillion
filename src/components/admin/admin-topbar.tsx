@@ -14,12 +14,15 @@ interface AdminTopBarProps {
 const sectionLabels: Record<string, string> = {
   dashboard: "Dashboard",
   company: "Company",
+  pages: "Page content",
   products: "Products",
   solutions: "Solutions",
   packages: "Packages",
   projects: "Projects",
+  videos: "Videos",
   insights: "Insights",
   services: "Services",
+  leads: "Leads",
   settings: "Settings",
 };
 
